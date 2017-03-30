@@ -11,7 +11,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 	public $status=['All'];
 
-	public $actions=['All'=>['view','edit','delete','manage_attandance']];
+	public $actions=['All'=>['view','edit','delete','manage_attendance']];
 
 	function init(){
 		parent::init();
@@ -25,5 +25,9 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 		$this->add('xavoc\securityservices\Controller_ACLFields');
 		
+	}
+
+	function manage_attendance(){
+		$this->app->page_action_result = $this->app->js()->univ()->location($this->app->url('xavoc_secserv_manageattendance',['client_monthyear_record_id'=>$this->id]));
 	}
 }
