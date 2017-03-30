@@ -11,7 +11,7 @@ class page_invoices extends \xepan\base\Page {
 		parent::init();
 
 		$c = $this->add('xepan\hr\CRUD');
-		$c->setModel('xavoc\securityservices\ClientMonthYear')->debug();
+		$c->setModel('xavoc\securityservices\ClientMonthYear');
 
 	}
 }
