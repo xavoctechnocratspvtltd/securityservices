@@ -3,9 +3,9 @@
 namespace xavoc\securityservices;
 
 
-class page_invoices extends \xepan\base\Page {
+class page_monthrecords extends \xepan\base\Page {
 	
-	public $title ="Client Invoices";
+	public $title ="Client Records";
 
 	function init(){
 		parent::init();

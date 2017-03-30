@@ -6,9 +6,7 @@ namespace xavoc\securityservices;
 class Model_Attendance extends \xepan\base\Model_Table{ 
 	public $table = "secserv_attendance";
 	
-	public $acl="xavoc\securityservices\Model_ClientMonthYear";
-	public $acl_type = "attendance";
-	
+	public $acl="xavoc\securityservices\Model_ClientMonthYear";	
 	function init(){
 		parent::init();
 

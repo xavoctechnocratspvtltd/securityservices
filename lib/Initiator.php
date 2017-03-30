@@ -15,7 +15,7 @@ class Initiator extends \Controller_Addon {
         $m->addItem(['Services','icon'=>'fa fa-check-square-o'],'xavoc_secserv_billingservices');
         $m->addItem(['Clients','icon'=>'fa fa-check-square-o'],'xavoc_secserv_clients');
         $m->addItem(['Labours','icon'=>'fa fa-check-square-o'],'xavoc_secserv_labours');
-        $m->addItem(['Invoices','icon'=>'fa fa-check-square-o'],'xavoc_secserv_invoices');
+        $m->addItem(['Monthly Records','icon'=>'fa fa-check-square-o'],'xavoc_secserv_monthrecords');
         $m->addItem(['Payments','icon'=>'fa fa-check-square-o'],'xavoc_secserv_payments');
         return $this;
     }

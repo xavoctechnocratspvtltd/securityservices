@@ -5,7 +5,7 @@ namespace xavoc\securityservices;
 
 class page_generateapprovalsheet extends \xepan\base\Page {
 	
-	public $title ="Attendance";
+	public $title ="Approval Sheet";
 
 	function init(){
 		parent::init();
@@ -18,10 +18,10 @@ class page_generateapprovalsheet extends \xepan\base\Page {
 		if(!$month_year_model->loaded())
 			throw new \Exception("client month year not found", 1);
 			
-		$attendance_model = $this->add('xavoc\securityservices\Model_Attendance');	
-		$attendance_model->addCondition('client_month_year_id',$month_year_id);
+		$approval_model = $this->add('xavoc\securityservices\Model_ApprovalSheet');	
+		$approval_model->addCondition('client_month_year_id',$month_year_id);
 
 		$c = $this->add('xepan\hr\CRUD');
-		$c->setModel($attendance_model);
+		$c->setModel($approval_model);
 	}
 }
