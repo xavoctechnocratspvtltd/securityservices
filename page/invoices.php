@@ -13,5 +13,9 @@ class page_invoices extends \xepan\base\Page {
 		$c = $this->add('xepan\hr\CRUD');
 		$c->setModel('xavoc\securityservices\ClientMonthYear');
 
+		$c->grid->removeColumn('status');
+		$c->grid->removeColumn('created_by');
+		$c->grid->removeColumn('attachment_icon');
+
 	}
 }

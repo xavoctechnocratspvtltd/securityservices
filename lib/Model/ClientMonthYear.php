@@ -11,7 +11,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 	public $status=['All'];
 
-	public $actions=['All'=>['view','edit','delete','manage_attendance']];
+	public $actions=['All'=>['view','edit','delete','manage_attendance','generate_approval_sheet']];
 
 	function init(){
 		parent::init();
@@ -29,5 +29,9 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 	function manage_attendance(){
 		$this->app->redirect($this->app->url('xavoc_secserv_manageattendance',['client_monthyear_record_id'=>$this->id]));
+	}
+
+	function generate_approval_sheet(){
+		$this->app->redirect($this->app->url('xavoc_secserv_generateapprovalsheet',['client_monthyear_record_id'=>$this->id]));
 	}
 }
