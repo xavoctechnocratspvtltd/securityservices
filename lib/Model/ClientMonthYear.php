@@ -28,6 +28,6 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 	}
 
 	function manage_attendance(){
-		$this->app->page_action_result = $this->app->js()->univ()->location($this->app->url('xavoc_secserv_manageattendance',['client_monthyear_record_id'=>$this->id]));
+		$this->app->redirect($this->app->url('xavoc_secserv_manageattendance',['client_monthyear_record_id'=>$this->id]));
 	}
 }
