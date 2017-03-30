@@ -3,7 +3,7 @@
 namespace xavoc\securityservices;
 
 
-class page_payment extends \xepan\base\Page {
+class page_payments extends \xepan\base\Page {
 	
 	public $title ="Labour Payments";
 
