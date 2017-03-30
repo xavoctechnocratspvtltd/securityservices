@@ -1,24 +1,43 @@
 /*
- Navicat Premium Data Transfer
+Navicat MySQL Data Transfer
 
- Source Server         : localhost
- Source Server Type    : MariaDB
- Source Server Version : 100118
- Source Host           : localhost
- Source Database       : secserv
+Source Server         : Localhost
+Source Server Version : 50505
+Source Host           : localhost:3306
+Source Database       : printonclick
 
- Target Server Type    : MariaDB
- Target Server Version : 100118
- File Encoding         : utf-8
+Target Server Type    : MYSQL
+Target Server Version : 50505
+File Encoding         : 65001
 
- Date: 03/30/2017 11:33:26 AM
+Date: 2017-03-30 12:57:40
 */
 
-SET NAMES utf8;
-SET FOREIGN_KEY_CHECKS = 0;
+SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------
---  Table structure for `secserv_billing_service`
+-- Table structure for `secserv_attendance`
+-- ----------------------------
+DROP TABLE IF EXISTS `secserv_attendance`;
+CREATE TABLE `secserv_attendance` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `labour_id` int(11) NOT NULL,
+  `client_month_year_id` int(11) NOT NULL,
+  `client_department_id` int(11) DEFAULT NULL,
+  `client_service_id` int(11) DEFAULT NULL,
+  `date` datetime NOT NULL,
+  `unit` varchar(255) NOT NULL,
+  `unit_work` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+-- ----------------------------
+-- Records of secserv_attendance
+-- ----------------------------
+INSERT INTO `secserv_attendance` VALUES ('1', '2', '3', '3', '4', '2017-03-30 00:00:00', 'shift', '190');
+
+-- ----------------------------
+-- Table structure for `secserv_billing_service`
 -- ----------------------------
 DROP TABLE IF EXISTS `secserv_billing_service`;
 CREATE TABLE `secserv_billing_service` (
@@ -27,10 +46,17 @@ CREATE TABLE `secserv_billing_service` (
   `created_by_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
---  Table structure for `secserv_client`
+-- Records of secserv_billing_service
+-- ----------------------------
+INSERT INTO `secserv_billing_service` VALUES ('7', 'H/W', '5', '2017-03-30 11:52:41');
+INSERT INTO `secserv_billing_service` VALUES ('8', 'S/W', '5', '2017-03-30 11:52:47');
+INSERT INTO `secserv_billing_service` VALUES ('9', 'H/W doc', '5', '2017-03-30 11:52:55');
+
+-- ----------------------------
+-- Table structure for `secserv_client`
 -- ----------------------------
 DROP TABLE IF EXISTS `secserv_client`;
 CREATE TABLE `secserv_client` (
@@ -44,10 +70,15 @@ CREATE TABLE `secserv_client` (
   `created_at` datetime DEFAULT NULL,
   `status` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
---  Table structure for `secserv_client_department`
+-- Records of secserv_client
+-- ----------------------------
+INSERT INTO `secserv_client` VALUES ('2', 'Rakesh', '15.00', '1', null, null, '5', '2017-03-30 11:53:36', 'Active');
+
+-- ----------------------------
+-- Table structure for `secserv_client_department`
 -- ----------------------------
 DROP TABLE IF EXISTS `secserv_client_department`;
 CREATE TABLE `secserv_client_department` (
@@ -58,10 +89,17 @@ CREATE TABLE `secserv_client_department` (
   `created_by_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
---  Table structure for `secserv_client_monthyear_record`
+-- Records of secserv_client_department
+-- ----------------------------
+INSERT INTO `secserv_client_department` VALUES ('3', 'Dahi Ladies ', '2', '4', '5', '2017-03-30 12:03:59');
+INSERT INTO `secserv_client_department` VALUES ('4', 'Dairy Security', '2', '4', '5', '2017-03-30 12:04:16');
+INSERT INTO `secserv_client_department` VALUES ('5', 'Ladies Night', '2', '5', '5', '2017-03-30 12:04:30');
+
+-- ----------------------------
+-- Table structure for `secserv_client_monthyear_record`
 -- ----------------------------
 DROP TABLE IF EXISTS `secserv_client_monthyear_record`;
 CREATE TABLE `secserv_client_monthyear_record` (
@@ -71,10 +109,16 @@ CREATE TABLE `secserv_client_monthyear_record` (
   `created_by_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
---  Table structure for `secserv_client_service`
+-- Records of secserv_client_monthyear_record
+-- ----------------------------
+INSERT INTO `secserv_client_monthyear_record` VALUES ('3', '02-2017', '2', '5', '2017-03-30 11:55:49');
+INSERT INTO `secserv_client_monthyear_record` VALUES ('4', '03-2017', '2', '5', '2017-03-30 11:56:03');
+
+-- ----------------------------
+-- Table structure for `secserv_client_service`
 -- ----------------------------
 DROP TABLE IF EXISTS `secserv_client_service`;
 CREATE TABLE `secserv_client_service` (
@@ -91,10 +135,16 @@ CREATE TABLE `secserv_client_service` (
   `created_by_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
---  Table structure for `secserv_labour`
+-- Records of secserv_client_service
+-- ----------------------------
+INSERT INTO `secserv_client_service` VALUES ('4', 'H/W', '2', '7', 'Shift', '9', '300', 'Hour', '8', '20', '5', '2017-03-30 11:59:37');
+INSERT INTO `secserv_client_service` VALUES ('5', 'S/W', '2', '8', 'Shift', '12', '350', 'Hour', '12', '25', '5', '2017-03-30 12:03:11');
+
+-- ----------------------------
+-- Table structure for `secserv_labour`
 -- ----------------------------
 DROP TABLE IF EXISTS `secserv_labour`;
 CREATE TABLE `secserv_labour` (
@@ -107,6 +157,11 @@ CREATE TABLE `secserv_labour` (
   `created_by_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
-SET FOREIGN_KEY_CHECKS = 1;
+-- ----------------------------
+-- Records of secserv_labour
+-- ----------------------------
+INSERT INTO `secserv_labour` VALUES ('2', 'labour 1', '2', '4', '4', '1', '5', '2017-03-30 12:05:28');
+INSERT INTO `secserv_labour` VALUES ('3', 'labour 2', '2', '4', '5', '1', '5', '2017-03-30 12:05:52');
+INSERT INTO `secserv_labour` VALUES ('4', 'Labour 3', '2', '5', '5', '1', '5', '2017-03-30 12:06:09');
