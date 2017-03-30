@@ -110,4 +110,28 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		throw new \Exception("TODO", 1);
 
 	}
+
+	function additionalLabour(){
+		if(!$this->loaded()) throw new \Exception("model client month year must loaded");
+				
+		// used only for getting labour that not have same default_labour_id 
+		$attendance_model = $this->add('xavoc\securityservices\Model_Attendance');
+		$attendance_model->addExpression('client_id')->set(function($m,$q){
+			return  $q->expr('IFNULL([0],0)',[$m->refSQL('client_month_year_id')->fieldQuery('client_id')]);
+		});
+
+		$attendance_model->addExpression('labour_default_client_id')->set(function($m,$q){
+			return $q->expr('IFNULL([0],0)',[$m->refSQL('labour_id')->fieldQuery('default_client_id')]);
+		});
+		
+		$attendance_model->addExpression('is_default_client')->set(function($m,$q){
+			return $q->expr('IF(([0]=[1]),1,0)',[$m->getElement('client_id'),$m->getElement('labour_default_client_id')]);
+		})->type('boolean');
+
+		$attendance_model->addCondition('client_month_year_id',$this->id);
+		$attendance_model->addCondition('is_default_client',false);
+		$attendance_model->setOrder('labour','asc');	
+		
+		return $attendance_model;		
+	}
 }
