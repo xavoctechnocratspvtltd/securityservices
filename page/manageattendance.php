@@ -18,38 +18,34 @@ class page_manageattendance extends \xepan\base\Page {
 		if(!$month_year_model->loaded())
 			throw new \Exception("client month year not found", 1);
 
-		$data = [
-				'month_days'=>31,
-				'labours'=>[
-						'labour_id'=>[
-								'name'=>'labour_name',
-								'units_work'=>20
-							]
-					],
-				'additional_labours'=>[
-						'labour_id'=>[
-							'name'=>'labour_name',
-							'units_work'=>20
-						]		
-					]
-			];
+		$client_labour_model = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id']]);
+		$default_labours = $client_labour_model->getRows();
 
-		$default_labour = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id']])->getRows();
-		echo "<pre>";
-		print_r($default_labour);
-		echo "</pre>";
-
-		$additional_labour = $month_year_model->additionalLabour()->getRows();
-		echo "<pre>";
-		print_r($additional_labour);
-		echo "</pre>";		
-		exit;
-
-		foreach($default_labour as $labour_id => $labour_data) {
-
-		}
-
+		$additional_labours = $month_year_model->additionalLabour()->getRows();
+		
+		$last_date = date("t",strtotime($month_year_model['month_year']));
+		// $data = [
+		// 		'month_days'=>31,
+		// 		'labours'=>[
+		// 				'any_key'=>[
+		// 						'name'=>'labour_name',
+		// 						'units_work'=>20
+		// 					]
+		// 			],
+		// 		'additional_labours'=>[
+		// 				'any_key'=>[
+		// 					'name'=>'labour_name',
+		// 					'units_work'=>20
+		// 				]		
+		// 			]
+		// 	];
 		$this->js(true)->_load('jquery.livequery');
-		$this->js(true)->_load('attendance')->xavoc_secserv_attendance([]);
+		$this->js(true)->_load('attendance')
+						->xavoc_secserv_attendance(
+							[
+								'month_days'=>$last_date,
+								'default_labours'=>json_encode($default_labours),
+								'additional_labours'=>json_encode($additional_labours)
+							]);
 	}
 }

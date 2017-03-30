@@ -17,7 +17,9 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		parent::init();
 
 		$this->hasOne('xavoc\securityservices\Client','client_id');
-		$this->addField('name')->caption('Month Year');
+		$this->addField('name');
+		
+		$this->addField('month_year')->type('date');
 
 		$this->add('misc/Field_Callback','status')->set(function($m){
 			return "All";
@@ -28,6 +30,9 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$this->hasMany('xavoc\securityservices\Attendance','client_month_year_id');
 		$this->hasMany('xavoc\securityservices\ApprovalSheet','client_month_year_id');
 
+		$this->is([
+				'month_year|to_trim|required'
+			]);
 	}
 
 	function manage_attendance(){
