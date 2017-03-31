@@ -62,14 +62,17 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 	addLiveEvent: function(){
 		var self = this;
 
-		$(self.element).keydown(function(e){
+		$(self.element).find('input').keydown(function(e){
 			switch(e.which){
 				case 37: //left arrow key
 					// alert('left');
 				break;
 
 				case 38: //up arrow key
-					// alert('up');
+					var col = $(this).closest('tr').find('input').index($(this));
+					var prev_row = $(this).closest('tr').prev();
+					if(prev_row.length ===0) return;
+					$(prev_row).find('input').eq(col).focus();
 				break;
 
 				case 39: //right arrow key
@@ -77,7 +80,10 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 				break;
 
 				case 40: //down arrow key
-					// alert('down');
+					var col = $(this).closest('tr').find('input').index($(this));
+					var next_row = $(this).closest('tr').next();
+					if(next_row.length ===0) return;
+					$(next_row).find('input').eq(col).focus();
 				break;
 			}
 		});
@@ -108,13 +114,13 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 			'}',
 
 			'.sec-attendance-widget input {',
-				'width:100px;',
+				'width:30px;',
 			'}',
 
 			'.sec-attendance-widget input:focus {',
 				'background-color:yellow;',
 				// 'color:white;',
-				'font-size:20px;',
+				// 'font-size:20px;',
 			'}',
 			'</style>'
 		].join("");
