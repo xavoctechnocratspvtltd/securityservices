@@ -7,8 +7,8 @@ class page_manageattendance extends \xepan\base\Page {
 	
 	public $title ="Attendance";
 
-	function init(){
-		parent::init();
+	function page_index(){
+		// parent::init();
 
 		$month_year_id = $this->app->stickyGET('client_monthyear_record_id');
 
@@ -18,11 +18,11 @@ class page_manageattendance extends \xepan\base\Page {
 		if(!$month_year_model->loaded())
 			throw new \Exception("client month year not found", 1);
 
-		$client_labour_model = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id']]);
-		$default_labours = $client_labour_model->getRows();
+		// $client_labour_model = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id']]);
+		// $default_labours = $client_labour_model->getRows();
 
-		$additional_labours = $month_year_model->additionalLabour()->getRows();
-		
+		// $additional_labours = $month_year_model->additionalLabour()->getRows();
+
 		$last_date = date("t",strtotime($month_year_model['month_year']));
 		// $data = [
 		// 		'month_days'=>31,
@@ -38,14 +38,34 @@ class page_manageattendance extends \xepan\base\Page {
 		// 					'units_work'=>20
 		// 				]		
 		// 			]
-		// 	];
+		//];
+
+		$client_departments = $this->add('xavoc\securityservices\Model_ClientDepartment')->addCondition('client_id',$month_year_model['client_id']);
+		$this->title = $month_year_model['client']." ".$month_year_model['name']." (".$month_year_model['month_year'].") Attendance";
+		
 		$this->js(true)->_load('jquery.livequery');
 		$this->js(true)->_load('attendance')
 						->xavoc_secserv_attendance(
 							[
+								'client_month_year_id'=>$month_year_model->id,
+								'client_id'=>$month_year_model['client_id'],
+								'client_name'=>$month_year_model['client'],
+								'client_departments'=>$client_departments->getRows(['id','name']),
 								'month_days'=>$last_date,
-								'default_labours'=>json_encode($default_labours),
-								'additional_labours'=>json_encode($additional_labours)
+								'default_labours'=>'{}',
+								'additional_labours'=>'{}'
 							]);
 	}
+
+	function page_labours(){
+		
+		// $client_labour_model = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id']]);
+		// $default_labours = $client_labour_model->getRows();
+
+		// $additional_labours = $month_year_model->additionalLabour()->getRows();
+		$c_m_y_id = $_GET['client_month_year_id'];
+		echo $c_m_y_id;
+		exit;
+	}
+
 }

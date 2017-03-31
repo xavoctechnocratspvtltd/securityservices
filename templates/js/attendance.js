@@ -1,5 +1,11 @@
 jQuery.widget("ui.xavoc_secserv_attendance",{
+	client_data_page:'index.php?page=xavoc_secserv_manageattendance_labours',
 	options:{
+		client_month_year_id:0,
+		client_id:0,
+		client_name:undefined,
+		client_departments:[],
+		selected_department_id:0,
 		month_days:0,
 		default_labours:{},
 		additional_labours:{}
@@ -9,18 +15,63 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		var self = this;
 
 		self.setupEnvironment();
-		self.loadData();
-		self.loadCSS();
+		// self.loadCSS();
 		self.addLiveEvent();
 	},
 
 	setupEnvironment: function(){
 		var self = this;
+
+
 		self.wrapper = wrapper = $('<div class="sec-attendance-widget"></div>').appendTo(self.element);
+		self.widget_header = $('<div class="sec-widget-header main-box">').appendTo(self.wrapper);
 		self.table = table = $('<table class="sec-employee-attendance data" border="1"></table>').appendTo(wrapper);
 		self.thead = thead = $('<thead class="sec-header">').appendTo(table);
 		self.thead_tr = thead_tr = $('<tr>').appendTo(thead);
 		self.tbody = tbody = $('<tbody class="sec-results">').appendTo(table);
+
+		var department = $("<select>").appendTo(self.widget_header);
+		var dept_option = '<option value="0">Please Select Client Department</option>';
+		$.each(self.options.client_departments,function(index,dept){
+			dept_option += '<option value="'+dept.id+'">'+dept.name+'</option>';
+		});
+		$(dept_option).appendTo(department);
+		$(department).change(function(){
+			selected_dept_id = $(this).val();
+			self.options.selected_department_id = selected_dept_id;
+			// ajax calling for default labour and additional labour
+			$.ajax({
+					url:self.client_data_page,
+					data:{
+						dept_id:selected_dept_id,
+						client_month_year_id:self.options.client_month_year_id
+					},
+					success: function( data ) {
+						console.log(data);
+						// item_data = JSON.parse(data);
+		          	},
+		          	error: function(XMLHttpRequest, textStatus, errorThrown) {
+		              alert("Error getting prospect list: " + textStatus);
+		            }
+				});
+
+			self.clearData();
+			if(selected_dept_id > 0){
+				self.loadData();
+			}
+		});
+	},
+
+	clearData: function(){
+		var self = this;
+		//department options set to empty
+		self.options.default_labours = '{}';
+		self.options.additional_labours = '{}';
+
+		// html content remove
+		$(self.thead_tr).html("");
+		$(self.tbody).html("");
+
 	},
 
 	loadData: function(){
@@ -34,11 +85,10 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 			thead_html += '<th>'+i+'</th>';
 		}
 		$(thead_html).appendTo(self.thead_tr);
-		// console.log(self.thead_tr);
-		// console.log(self.tbody);
-		// console.log(default_labours);
-		// console.log(additional_labours);
 
+		if(default_labours.length == undefined || default_labours.length == 0){
+			$('<div>No One Default Labour Added</div>').appendTo(self.tbody);
+		}
 
 		// for all employee and it's unit's work
 		$.each(default_labours,function(index,labour_data){
