@@ -19,7 +19,25 @@ class page_manageattendance extends \xepan\base\Page {
 			throw new \Exception("client month year not found", 1);
 
 		$last_date = date("t",strtotime($month_year_model['month_year']));
+		
+		$all_labour = $this->getAllRemainingLabours($month_year_model);
 
+		$client_departments = $this->add('xavoc\securityservices\Model_ClientDepartment')->addCondition('client_id',$month_year_model['client_id']);
+		$this->title = $month_year_model['client']." ".$month_year_model['name']." (".$month_year_model['month_year'].") Attendance";
+		
+		$this->js(true)->_load('jquery.livequery');
+		$this->js(true)->_load('attendance')
+						->xavoc_secserv_attendance(
+							[
+								'client_month_year_id'=>$month_year_model->id,
+								'client_id'=>$month_year_model['client_id'],
+								'client_name'=>$month_year_model['client'],
+								'client_departments'=>$client_departments->getRows(['id','name']),
+								'month_days'=>$last_date,
+								'default_labours'=>'{}',
+								'additional_labours'=>'{}',
+								'remaining_all_labours'=>json_encode($all_labour)
+							]);
 		// $data = [
 		// 		'month_days'=>31,
 		// 		'labours'=>[
@@ -35,21 +53,6 @@ class page_manageattendance extends \xepan\base\Page {
 		// 				]		
 		// 			]
 		//];
-		$client_departments = $this->add('xavoc\securityservices\Model_ClientDepartment')->addCondition('client_id',$month_year_model['client_id']);
-		$this->title = $month_year_model['client']." ".$month_year_model['name']." (".$month_year_model['month_year'].") Attendance";
-		
-		$this->js(true)->_load('jquery.livequery');
-		$this->js(true)->_load('attendance')
-						->xavoc_secserv_attendance(
-							[
-								'client_month_year_id'=>$month_year_model->id,
-								'client_id'=>$month_year_model['client_id'],
-								'client_name'=>$month_year_model['client'],
-								'client_departments'=>$client_departments->getRows(['id','name']),
-								'month_days'=>$last_date,
-								'default_labours'=>'{}',
-								'additional_labours'=>'{}'
-							]);
 	}
 
 	function page_labours(){
@@ -110,7 +113,7 @@ class page_manageattendance extends \xepan\base\Page {
 					]
 		]
 		*/
-		
+
 		$return = ['status'=>'failed'];
 
 		if($record_id <= 0){
@@ -120,5 +123,31 @@ class page_manageattendance extends \xepan\base\Page {
 
 		echo json_encode($return);
 		exit;
+	}
+
+	function getAllRemainingLabours($month_year_model){
+
+		// client default labours
+		$default_labours = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id']]);
+		$default_labours = $default_labours->_dsql()->del('fields')->field('id')->getAll();
+		$default_labours = iterator_to_array(new \RecursiveIteratorIterator(new \RecursiveArrayIterator($default_labours)),false);
+		
+		$additional_labours = $month_year_model->additionalLabour();
+		$additional_labours = $additional_labours->_dsql()->del('fields')->field('id')->getAll();
+		$additional_labours = iterator_to_array(new \RecursiveIteratorIterator(new \RecursiveArrayIterator($additional_labours)),false);
+
+		//get all labours
+		$labours = $this->add('xavoc\securityservices\Model_Labour')
+						->addCondition('is_active',true)
+						->getRows()
+						;
+		$all_labour = [];
+		foreach ($labours as $labour) {
+			if(in_array($labour['id'],$default_labours) OR in_array($labour['id'],$additional_labours) ) continue;
+			
+			$all_labour[$labour['id']] = $labour;
+		}
+
+		return $all_labour;
 	}
 }

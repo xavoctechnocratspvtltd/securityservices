@@ -9,7 +9,9 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		selected_department_id:0,
 		month_days:0,
 		default_labours:{},
-		additional_labours:{}
+		additional_labours:{},
+		remaining_all_labours:{},
+		used_labours:{}
 	},
 
 	_create:function(){
@@ -23,10 +25,9 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 	setupEnvironment: function(){
 		var self = this;
 
-
 		self.wrapper = wrapper = $('<div class="sec-attendance-widget"></div>').appendTo(self.element);
 		self.widget_header = $('<div class="sec-widget-header main-box">').appendTo(self.wrapper);
-		self.table = table = $('<table class="sec-employee-attendance data" border="1"></table>').appendTo(wrapper);
+		self.table = table = $('<table class="sec-employee-attendance data" border="1"></table>').appendTo(self.wrapper);
 		self.thead = thead = $('<thead class="sec-header">').appendTo(table);
 		self.thead_tr = thead_tr = $('<tr>').appendTo(thead);
 		self.tbody = tbody = $('<tbody class="sec-attendance">').appendTo(table);
@@ -68,9 +69,8 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 	              alert("Error getting prospect list: " + textStatus);
 	            }
 			});
-
-			// self.loadData();
 		});
+
 	},
 
 	addSaveButton: function(){
@@ -94,7 +94,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 					inserted_data['attendance'][""+curr_labour_id][""+curr_date] = ($(current_td).find('input').val())?$(current_td).find('input').val():0;
 				});
 			});
-			
+
 			$.ajax({
 				url:self.save_page,
 				type: 'POST',
@@ -124,6 +124,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		//department options set to empty
 		self.options.default_labours = '{}';
 		self.options.additional_labours = '{}';
+		self.options.used_labours = [];
 
 		// html content remove
 		$(self.thead_tr).html("");
@@ -139,6 +140,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 
 		default_labours = self.options.default_labours;
 		additional_labours = self.options.additional_labours;
+		remaining_labours = JSON.parse(self.options.remaining_all_labours);
 
 		// for header 
 		var thead_html = "<th>Labour Name</th>";
@@ -155,6 +157,27 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		$.each(default_labours,function(index,labour_data){
 			self.addRow(labour_data);
 		});
+
+		var add_tr = $('<tr></tr>').appendTo(self.tbody);
+		var add_form =  $('<td colspan="'+(self.options.month_days+1)+'">add additional labour</td>').appendTo(add_tr);
+		var group = $('<div class="input-group">').appendTo(add_form);
+		var labour_field = $('<select class="form-control"></select>').appendTo(group);
+		var add_labour_btn = $('<span class="input-group-btn"><button class="btn btn-primary" type="button">Add</button></span></div>').appendTo(group);
+		
+		var additional_options = '<option value="0">Please Select Additional Labour</option>';
+		// console.log(self.options.remaining_all_labours);
+		$.each(remaining_labours,function(index,labour){
+			additional_options += '<option value="'+labour.id+'">'+labour.name+'</option>';
+		});
+		$(additional_options).appendTo(labour_field);
+
+		$(add_labour_btn).click(function(){
+			var selected_labour_id = $(labour_field).val();
+			if(selected_labour_id == 0 || selected_labour_id == undefined || selected_labour_id == "") return false;
+			
+			// todo check if labour is not used
+			self.addRow(remaining_labours[selected_labour_id]);
+		});
 	},
 
 	addRow: function(labour_data){
@@ -168,6 +191,8 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 
 		tr_html += "</tr>";
 		$(tr_html).appendTo(self.tbody);
+
+		self.options.used_labours[labour_data.id] = labour_data.id;
 	},
 
 	addLiveEvent: function(){
