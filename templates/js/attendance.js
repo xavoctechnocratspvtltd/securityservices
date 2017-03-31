@@ -1,5 +1,6 @@
 jQuery.widget("ui.xavoc_secserv_attendance",{
 	client_data_page:'index.php?page=xavoc_secserv_manageattendance_labours',
+	save_page:'index.php?page=xavoc_secserv_manageattendance_save',
 	options:{
 		client_month_year_id:0,
 		client_id:0,
@@ -28,7 +29,8 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		self.table = table = $('<table class="sec-employee-attendance data" border="1"></table>').appendTo(wrapper);
 		self.thead = thead = $('<thead class="sec-header">').appendTo(table);
 		self.thead_tr = thead_tr = $('<tr>').appendTo(thead);
-		self.tbody = tbody = $('<tbody class="sec-results">').appendTo(table);
+		self.tbody = tbody = $('<tbody class="sec-attendance">').appendTo(table);
+		self.widget_footer = $('<div class="sec-widget-footer">').appendTo(self.wrapper);
 
 		var department = $("<select>").appendTo(self.widget_header);
 		var dept_option = '<option value="0">Please Select Client Department</option>';
@@ -60,6 +62,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 					self.options.default_labours = labour_data.data.default_labours;
 					self.options.additional_labours = labour_data.data.additional_labours;
 					self.loadData();
+					self.addSaveButton();
 	          	},
 	          	error: function(XMLHttpRequest, textStatus, errorThrown) {
 	              alert("Error getting prospect list: " + textStatus);
@@ -68,16 +71,51 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 
 			// self.loadData();
 		});
-
-		self.addSaveButton();
 	},
 
 	addSaveButton: function(){
 		var self = this;
 
-		$save_btn = $('<button class="btn btn-primary">Save</button>').appendTo(self.wrapper);
+		$save_btn = $('<button class="btn btn-primary">Save</button>').appendTo(self.widget_footer);
+
 		$save_btn.click(function(){
-			alert('save click todo');
+			var inserted_data = {};
+			inserted_data.client_id = self.options.client_id;
+			inserted_data.client_month_year_id = self.options.client_month_year_id;
+			inserted_data.department_id = self.options.selected_department_id;
+			inserted_data.attendance = {};
+
+			$(self.element).find('tbody.sec-attendance tr').each(function(index,current_tr){
+				curr_labour_id = $(current_tr).attr('data-labour_id');
+				inserted_data.attendance[""+curr_labour_id] = {};
+
+				$(current_tr).find('td').each(function(index,current_td){
+					curr_date = $(current_td).attr('data-date');
+					inserted_data['attendance'][""+curr_labour_id][""+curr_date] = ($(current_td).find('input').val())?$(current_td).find('input').val():0;
+				});
+			});
+			
+			$.ajax({
+				url:self.save_page,
+				type: 'POST',
+				data:{
+					attendance_data:JSON.stringify(inserted_data),
+					dept_id:self.options.selected_department_id,
+					record_id:self.options.client_month_year_id
+				},
+				success: function( data ) {
+					labour_data = JSON.parse(data);
+					if(labour_data.status == "failed"){
+						$.univ().errorMessage('not saved');
+						return;
+					}else{
+						$.univ().successMessage('saved successfully');
+					}
+	          	},
+	          	error: function(XMLHttpRequest, textStatus, errorThrown) {
+	              alert("Error getting prospect list: " + textStatus);
+	            }
+			});
 		});
 	},
 
@@ -90,6 +128,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		// html content remove
 		$(self.thead_tr).html("");
 		$(self.tbody).html("");
+		$(self.widget_footer).html("");
 
 	},
 
@@ -120,11 +159,11 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 
 	addRow: function(labour_data){
 		var self = this;
-		tr_html = '<tr>';
+		tr_html = '<tr data-labour_id="'+labour_data.id+'">';
 		tr_html += "<th>"+labour_data.name+"</th>";
 		
 		for (var i =1; i <= self.options.month_days; i++) {
-			tr_html += '<td class="labour_units_work" ><input /></td>';
+			tr_html += '<td data-date="'+i+'" class="labour_units_work" ><input /></td>';
 		}
 
 		tr_html += "</tr>";

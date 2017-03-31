@@ -84,4 +84,41 @@ class page_manageattendance extends \xepan\base\Page {
 		exit;
 	}
 
+	function page_save(){
+		$record_id = $_POST['record_id'];
+		$dept_id = $_POST['dept_id'];		
+		$attendance_data = $_POST['attendance'];
+		
+		$attendance_data = json_decode($attendance_data);
+		
+		/**
+		[
+			'client_id':,
+			client_month_year_id:,
+			department_id:,
+			attendance:[
+					'labour_id_1'=>[
+							'date1'=>12
+							'date3'=>90
+							'date4'=>1
+						]
+					'labour_id_2'=>[
+							'date1'=>12
+							'date3'=>90
+							'date4'=>1
+						]
+					]
+		]
+		*/
+		
+		$return = ['status'=>'failed'];
+
+		if($record_id <= 0){
+			echo json_encode($return);
+			exit;
+		}
+
+		echo json_encode($return);
+		exit;
+	}
 }
