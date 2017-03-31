@@ -35,30 +35,38 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		$.each(self.options.client_departments,function(index,dept){
 			dept_option += '<option value="'+dept.id+'">'+dept.name+'</option>';
 		});
+
 		$(dept_option).appendTo(department);
 		$(department).change(function(){
 			selected_dept_id = $(this).val();
 			self.options.selected_department_id = selected_dept_id;
-			// ajax calling for default labour and additional labour
-			$.ajax({
-					url:self.client_data_page,
-					data:{
-						dept_id:selected_dept_id,
-						client_month_year_id:self.options.client_month_year_id
-					},
-					success: function( data ) {
-						console.log(data);
-						// item_data = JSON.parse(data);
-		          	},
-		          	error: function(XMLHttpRequest, textStatus, errorThrown) {
-		              alert("Error getting prospect list: " + textStatus);
-		            }
-				});
 
 			self.clearData();
-			if(selected_dept_id > 0){
-				self.loadData();
+			if(selected_dept_id == 0){
+				return;
 			}
+			// ajax calling for default labour and additional labour
+			$.ajax({
+				url:self.client_data_page,
+				data:{
+					dept_id:selected_dept_id,
+					record_id:self.options.client_month_year_id
+				},
+				success: function( data ) {
+					labour_data = JSON.parse(data);
+					if(labour_data.status == "failed")
+						return;
+					
+					self.options.default_labours = labour_data.data.default_labours;
+					self.options.additional_labours = labour_data.data.additional_labours;
+					self.loadData();
+	          	},
+	          	error: function(XMLHttpRequest, textStatus, errorThrown) {
+	              alert("Error getting prospect list: " + textStatus);
+	            }
+			});
+
+			// self.loadData();
 		});
 	},
 
@@ -76,9 +84,12 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 
 	loadData: function(){
 		var self = this;
-		default_labours = JSON.parse(self.options.default_labours);
-		additional_labours = JSON.parse(self.options.additional_labours);
+		// default_labours = JSON.parse(self.options.default_labours);
+		// additional_labours = JSON.parse(self.options.additional_labours);
 
+		default_labours = self.options.default_labours;
+		additional_labours = self.options.additional_labours;
+		
 		// for header 
 		var thead_html = "<th>Labour Name</th>";
 		for (var i =1; i <= self.options.month_days; i++) {

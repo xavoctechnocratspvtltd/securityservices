@@ -18,12 +18,8 @@ class page_manageattendance extends \xepan\base\Page {
 		if(!$month_year_model->loaded())
 			throw new \Exception("client month year not found", 1);
 
-		// $client_labour_model = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id']]);
-		// $default_labours = $client_labour_model->getRows();
-
-		// $additional_labours = $month_year_model->additionalLabour()->getRows();
-
 		$last_date = date("t",strtotime($month_year_model['month_year']));
+
 		// $data = [
 		// 		'month_days'=>31,
 		// 		'labours'=>[
@@ -39,7 +35,6 @@ class page_manageattendance extends \xepan\base\Page {
 		// 				]		
 		// 			]
 		//];
-
 		$client_departments = $this->add('xavoc\securityservices\Model_ClientDepartment')->addCondition('client_id',$month_year_model['client_id']);
 		$this->title = $month_year_model['client']." ".$month_year_model['name']." (".$month_year_model['month_year'].") Attendance";
 		
@@ -58,13 +53,34 @@ class page_manageattendance extends \xepan\base\Page {
 	}
 
 	function page_labours(){
-		
-		// $client_labour_model = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id']]);
-		// $default_labours = $client_labour_model->getRows();
+		$record_id = $_GET['record_id'];
+		$dept_id = $_GET['dept_id'];
 
-		// $additional_labours = $month_year_model->additionalLabour()->getRows();
-		$c_m_y_id = $_GET['client_month_year_id'];
-		echo $c_m_y_id;
+		$return = ['status'=>'failed','data'=>[]];
+
+		if($record_id <= 0){
+			echo json_encode($return);
+			exit;
+		}
+
+		$month_year_model = $this->add('xavoc\securityservices\Model_ClientMonthYear');
+		$month_year_model->addCondition('id',$record_id);
+		$month_year_model->tryLoadAny();
+		if(!$month_year_model->loaded()){
+			echo json_encode($return);
+			exit;
+		}
+
+		$labour_model = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id'],'department_id'=>$dept_id]);
+		$default_labours = $labour_model->getRows();
+
+		$additional_labours = $month_year_model->additionalLabour()->getRows();
+		
+		$return['status'] = "success";
+		$return['data']['default_labours'] = $default_labours;
+		$return['data']['additional_labours'] = $additional_labours;
+
+		echo json_encode($return);
 		exit;
 	}
 
