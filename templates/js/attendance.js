@@ -68,6 +68,17 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 
 			// self.loadData();
 		});
+
+		self.addSaveButton();
+	},
+
+	addSaveButton: function(){
+		var self = this;
+
+		$save_btn = $('<button class="btn btn-primary">Save</button>').appendTo(self.wrapper);
+		$save_btn.click(function(){
+			alert('save click todo');
+		});
 	},
 
 	clearData: function(){
@@ -89,7 +100,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 
 		default_labours = self.options.default_labours;
 		additional_labours = self.options.additional_labours;
-		
+
 		// for header 
 		var thead_html = "<th>Labour Name</th>";
 		for (var i =1; i <= self.options.month_days; i++) {
@@ -113,7 +124,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		tr_html += "<th>"+labour_data.name+"</th>";
 		
 		for (var i =1; i <= self.options.month_days; i++) {
-			tr_html += '<td><input /></td>';
+			tr_html += '<td class="labour_units_work" ><input /></td>';
 		}
 
 		tr_html += "</tr>";
