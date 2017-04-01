@@ -176,22 +176,34 @@ class page_manageattendance extends \xepan\base\Page {
 		$attendance_model = $this->add('xavoc\securityservices\Model_Attendance');
 		$attendance_model->addCondition('client_month_year_id',$client_month_year_id)
 					->addCondition('client_department_id',$department_id)
+					->addCondition('month',$client_month_year_model['month'])
+					->addCondition('year',$client_month_year_model['year'])
 					;
 		$attendance_model->deleteAll();
+
+		$month = date('m', strtotime($client_month_year_model['month_year']));
+		$year = date('Y', strtotime($client_month_year_model['month_year']));
 
 		//insert data
 		// INSERT INTO table_name (column1, column2, column3, ...)
 		// VALUES (value1, value2, value3, ...);
-		$month = date('m', strtotime($client_month_year_model['month_year']));
-		$year = date('Y', strtotime($client_month_year_model['month_year']));
+		$dept_client_shift_hours = $client_department_model['client_shift_hours'];
 
-		$insert_sql = "INSERT INTO secserv_attendance (`labour_id`, `client_month_year_id`, `client_department_id`, `client_service_id`, `units_work`, `date`)VALUES";
+		$insert_sql = "INSERT INTO secserv_attendance (`labour_id`, `client_month_year_id`, `client_department_id`, `client_service_id`, `units_work`, `date`,`overtime_units_work`, `shift_units_work`)VALUES";
 		foreach ($attendance as $labour_id => $sheet) {
 			foreach ($sheet as $day => $units_work) {
 
+				$shift_work = $units_work;
+				$overtime_work = 0;
+								
+				if($shift_work > $dept_client_shift_hours){
+					$overtime_work = $shift_work - $dept_client_shift_hours;
+					$shift_work = $dept_client_shift_hours;
+				}
+
 				$date = $year.'-'.$month.'-'.$day;
 				$attendance_date = date("Y-m-d H:i:s", strtotime($date));
-				$insert_sql .= '("'.$labour_id.'", "'.$client_month_year_id.'", "'.$client_department_model->id.'", "'.$client_department_model['default_client_service_id'].'", "'.$units_work.'", "'.$attendance_date.'"),';
+				$insert_sql .= '("'.$labour_id.'", "'.$client_month_year_id.'", "'.$client_department_model->id.'", "'.$client_department_model['default_client_service_id'].'", "'.$units_work.'", "'.$attendance_date.'", "'.$overtime_work.'", "'.$shift_work.'"),';
 			}
 		}
 		$insert_sql = trim($insert_sql,',');
