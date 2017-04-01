@@ -70,7 +70,7 @@ class page_manageattendance extends \xepan\base\Page {
 			$att_m_array = $att_m->addCondition('labour_id',$d_l['id'])
 				->addCondition('client_month_year_id',$month_year_model->id)
 				->addCondition('client_department_id',$dept_id)
-				->addCondition('client_department_id',$dept_id)
+				// ->addCondition('client_department_id',$dept_id)
 				->addCondition('month',$month_year_model['month'])
 				->addCondition('year',$month_year_model['year'])
 				->getRows();
@@ -82,7 +82,7 @@ class page_manageattendance extends \xepan\base\Page {
 			$default_labours[$key]['month_attendance'] = $month_record;
 		}
 
-		$add_labours = $month_year_model->additionalLabour()->getRows();
+		$add_labours = $month_year_model->additionalLabour($dept_id)->getRows();
 		//associating month attendance for additional labours
 		$additional_labours = [];
 
@@ -101,7 +101,7 @@ class page_manageattendance extends \xepan\base\Page {
 			$att_m_array = $att_m->addCondition('labour_id',$a_l['labour_id'])
 				->addCondition('client_month_year_id',$month_year_model->id)
 				->addCondition('client_department_id',$dept_id)
-				->addCondition('client_department_id',$dept_id)
+				// ->addCondition('client_department_id',$dept_id)
 				->addCondition('month',$month_year_model['month'])
 				->addCondition('year',$month_year_model['year'])
 				->getRows();

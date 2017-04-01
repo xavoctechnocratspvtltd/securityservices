@@ -124,7 +124,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 	}
 
-	function additionalLabour(){
+	function additionalLabour($department_id=null){
 		if(!$this->loaded()) throw new \Exception("model client month year must loaded");
 		
 		// used only for getting labour that not have same default_labour_id 
@@ -139,6 +139,9 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$attendance_model->addExpression('is_default_client')->set(function($m,$q){
 			return $q->expr('IF(([0]=[1]),1,0)',[$m->getElement('client_id'),$m->getElement('labour_default_client_id')]);
 		})->type('boolean');
+
+		if($department_id)
+			$attendance_model->addCondition('client_department_id',$department_id);
 
 		$attendance_model->addCondition('month',$this['month']);
 		$attendance_model->addCondition('year',$this['year']);
