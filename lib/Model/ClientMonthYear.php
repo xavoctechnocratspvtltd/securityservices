@@ -169,8 +169,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 	}
 
 	function print_invoice(){
-		throw new \Exception("TODO", 1);
-		
+		$this->app->page_action_result = $this->app->js()->univ()->newWindow($this->app->url('xavoc_secserv_printinvoice',['record_id'=>$this->id,'cut_page'=>1]))->execute();
 	}
 
 	function print_invoice_attachment(){
