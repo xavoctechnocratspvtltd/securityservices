@@ -86,6 +86,10 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 			inserted_data.attendance = {};
 
 			$(self.element).find('tbody.sec-attendance tr').each(function(index,current_tr){
+				if($(current_tr).hasClass('additional-labour-form-tr')){
+					return;
+				} ;
+
 				curr_labour_id = $(current_tr).attr('data-labour_id');
 				inserted_data.attendance[""+curr_labour_id] = {};
 
@@ -158,7 +162,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 			self.addRow(labour_data);
 		});
 
-		var add_tr = $('<tr></tr>').appendTo(self.tbody);
+		var add_tr = $('<tr class="additional-labour-form-tr"></tr>').appendTo(self.tbody);
 		var add_form =  $('<td colspan="'+(self.options.month_days+1)+'">add additional labour</td>').appendTo(add_tr);
 		var group = $('<div class="input-group">').appendTo(add_form);
 		var labour_field = $('<select class="form-control"></select>').appendTo(group);
@@ -173,10 +177,18 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 
 		$(add_labour_btn).click(function(){
 			var selected_labour_id = $(labour_field).val();
-			if(selected_labour_id == 0 || selected_labour_id == undefined || selected_labour_id == "") return false;
-			
-			// todo check if labour is not used
-			self.addRow(remaining_labours[selected_labour_id]);
+			if(selected_labour_id == 0 || selected_labour_id == undefined || selected_labour_id == ""){
+				$.univ().errorMessage('please select additional labour');
+				return false;
+			}
+
+			// check if labour is not used
+			if(self.options.used_labours[selected_labour_id] === undefined){
+				self.addRow(remaining_labours[selected_labour_id]);
+			}else{
+				$.univ().errorMessage('this labour is already added');
+			}
+
 		});
 	},
 
