@@ -18,6 +18,7 @@ class Model_Attendance extends \xepan\base\Model_Table{
 		$this->addField('date')->type('datetime')->defaultValue($this->app->now);
 		$this->addField('unit');
 		$this->addField('units_work')->type('Number');
+		$this->addField('overtime_units_work')->type('Number');
 
 		$this->addExpression('day')->set(function($m,$q){
 			return $q->expr('DAY([0])',[$m->getElement('date')]);
