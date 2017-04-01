@@ -18,6 +18,18 @@ class Model_Attendance extends \xepan\base\Model_Table{
 		$this->addField('date')->type('datetime')->defaultValue($this->app->now);
 		$this->addField('unit');
 		$this->addField('units_work')->type('Number');
-		
+
+		$this->addExpression('day')->set(function($m,$q){
+			return $q->expr('DAY([0])',[$m->getElement('date')]);
+		});
+
+		$this->addExpression('month')->set(function($m,$q){
+			return $q->expr('MONTH([0])',[$m->getElement('date')]);
+		});
+
+		$this->addExpression('year')->set(function($m,$q){
+			return $q->expr('YEAR([0])',[$m->getElement('date')]);
+		});
+
 	}
 }

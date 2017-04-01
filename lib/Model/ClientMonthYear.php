@@ -30,6 +30,14 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$this->hasMany('xavoc\securityservices\Attendance','client_month_year_id');
 		$this->hasMany('xavoc\securityservices\ApprovalSheet','client_month_year_id');
 
+		$this->addExpression('month')->set(function($m,$q){
+			return $q->expr('MONTH([0])',[$m->getElement('month_year')]);
+		});
+
+		$this->addExpression('year')->set(function($m,$q){
+			return $q->expr('YEAR([0])',[$m->getElement('month_year')]);
+		});
+
 		$this->is([
 				'month_year|to_trim|required'
 			]);

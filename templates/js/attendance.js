@@ -198,14 +198,19 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		var self = this;
 		tr_html = '<tr data-labour_id="'+labour_data.id+'">';
 		tr_html += "<th>"+labour_data.name+"</th>";
-		
+
+		month_attendance = labour_data.month_attendance;
+		i = 1
 		for (var i =1; i <= self.options.month_days; i++) {
-			tr_html += '<td data-date="'+i+'" class="labour_units_work" ><input /></td>';
+			units_work = month_attendance[i];
+			if(units_work == undefined)
+				units_work = 0;
+			tr_html += '<td data-date="'+i+'" class="labour_units_work" ><input value="'+units_work+'"/></td>';
 		}
 
 		tr_html += "</tr>";
 		$(tr_html).appendTo(self.tbody);
-
+		
 		self.options.used_labours[labour_data.id] = labour_data.id;
 	},
 

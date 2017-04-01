@@ -38,21 +38,6 @@ class page_manageattendance extends \xepan\base\Page {
 								'additional_labours'=>'{}',
 								'remaining_all_labours'=>json_encode($all_labour)
 							]);
-		// $data = [
-		// 		'month_days'=>31,
-		// 		'labours'=>[
-		// 				'any_key'=>[
-		// 						'name'=>'labour_name',
-		// 						'units_work'=>20
-		// 					]
-		// 			],
-		// 		'additional_labours'=>[
-		// 				'any_key'=>[
-		// 					'name'=>'labour_name',
-		// 					'units_work'=>20
-		// 				]		
-		// 			]
-		//];
 	}
 
 	function page_labours(){
@@ -76,6 +61,31 @@ class page_manageattendance extends \xepan\base\Page {
 
 		$labour_model = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id'],'department_id'=>$dept_id]);
 		$default_labours = $labour_model->getRows();
+		
+		// $total_days_in_month = date("t",strtotime($month_year_model['month_year']));
+		
+		//associating month attendance
+		foreach ($default_labours as $key => $d_l) {
+			$att_m = $this->add('xavoc\securityservices\Model_Attendance');
+			$att_m_array = $att_m->addCondition('labour_id',$d_l['id'])
+				->addCondition('client_month_year_id',$month_year_model->id)
+				->addCondition('client_department_id',$dept_id)
+				->addCondition('client_department_id',$dept_id)
+				->addCondition('month',$month_year_model['month'])
+				->addCondition('year',$month_year_model['year'])
+				->getRows();
+
+			$month_record = [];
+			foreach ($att_m_array as $index => $day_record) {
+				$month_record[$day_record['day']] = $day_record['units_work'];
+			}
+			$default_labours[$key]['month_attendance'] = $month_record;
+		}
+
+		// echo "<pre>";
+		// print_r($default_labours);
+		// echo "</pre>";
+		// exit;
 
 		$additional_labours = $month_year_model->additionalLabour()->getRows();
 		
