@@ -82,16 +82,50 @@ class page_manageattendance extends \xepan\base\Page {
 			$default_labours[$key]['month_attendance'] = $month_record;
 		}
 
+		$add_labours = $month_year_model->additionalLabour()->getRows();
+		//associating month attendance for additional labours
+		$additional_labours = [];
+
+		foreach ($add_labours as $key => $a_l) {
+
+			$labour = $this->add('xavoc\securityservices\Model_Labour');
+			$labour->addCondition('id',$a_l['labour_id']);
+			$labour->tryLoadAny();
+			if(!$labour->loaded()){
+				throw new \Exception("labour not found or deleted");
+			};
+
+			$temp = $labour->getRows();
+			
+			$att_m = $this->add('xavoc\securityservices\Model_Attendance');
+			$att_m_array = $att_m->addCondition('labour_id',$a_l['labour_id'])
+				->addCondition('client_month_year_id',$month_year_model->id)
+				->addCondition('client_department_id',$dept_id)
+				->addCondition('client_department_id',$dept_id)
+				->addCondition('month',$month_year_model['month'])
+				->addCondition('year',$month_year_model['year'])
+				->getRows();
+			$month_record = [];
+			foreach ($att_m_array as $index => $day_record) {
+				$month_record[$day_record['day']] = $day_record['units_work'];
+			}
+
+			$additional_labours = $temp;
+			$additional_labours[0]['month_attendance'] = $month_record;
+		}
+
 		// echo "<pre>";
-		// print_r($default_labours);
+		// print_r($additional_labours);
 		// echo "</pre>";
 		// exit;
 
-		$additional_labours = $month_year_model->additionalLabour()->getRows();
-		
 		$return['status'] = "success";
 		$return['data']['default_labours'] = $default_labours;
 		$return['data']['additional_labours'] = $additional_labours;
+
+		// echo "<pre>";
+		// print_r($return);
+		// echo "</pre>";
 
 		echo json_encode($return);
 		exit;
@@ -196,6 +230,7 @@ class page_manageattendance extends \xepan\base\Page {
 			if(in_array($labour['id'],$default_labours) OR in_array($labour['id'],$additional_labours) ) continue;
 			
 			$all_labour[$labour['id']] = $labour;
+			$all_labour[$labour['id']]['month_attendance']=[];
 		}
 
 		return $all_labour;

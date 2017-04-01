@@ -191,6 +191,10 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		});
 
 		// TODO show added additional labours
+		// for all employee and it's unit's work
+		$.each(additional_labours,function(index,labour_data){
+			self.addRow(labour_data);
+		});
 
 	},
 
@@ -200,6 +204,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		tr_html += "<th>"+labour_data.name+"</th>";
 
 		month_attendance = labour_data.month_attendance;
+
 		i = 1
 		for (var i =1; i <= self.options.month_days; i++) {
 			units_work = month_attendance[i];
@@ -210,7 +215,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 
 		tr_html += "</tr>";
 		$(tr_html).appendTo(self.tbody);
-		
+
 		self.options.used_labours[labour_data.id] = labour_data.id;
 	},
 
