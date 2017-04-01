@@ -19,6 +19,7 @@ class Model_GroupedAttendance extends Model_Attendance{
 			->field($this->dsql()->expr('[0] client_service',[$this->getElement('client_service')]))
 
 			->field($this->dsql()->expr('SUM([0]) as units_work_sum',[$this->getElement('units_work')]))
+			->field($this->dsql()->expr('SUM([0]) as overtime_units_work_sum',[$this->getElement('overtime_units_work')]))
 			;
 		
 		$this->_dsql()->group('client_month_year_id,client_department_id,client_service_id,date');

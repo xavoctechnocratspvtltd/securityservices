@@ -17,8 +17,11 @@ class Model_ApprovalSheet extends \xepan\base\Model_Table{
 		$this->hasOne('xavoc\securityservices\ClientDepartment','client_department_id');
 		$this->hasOne('xavoc\securityservices\ClientService','client_service_id');
 
-		$this->addField('units_works');
-		$this->addField('overtime_units_works');
+		$this->addField('is_overtime_record')->type('boolean')->defaultValue(false);
+		
+		for($i=1; $i<=31; $i++){
+			$this->addField('d'.$i)->caption($i);
+		}
 
 	}
 }

@@ -58,16 +58,52 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			$g = $page->add('xepan\hr\Grid');
 			$m = $this->add('xavoc\securityservices\Model_GroupedAttendance');
 			$m->addCondition('client_month_year_id',$this->id);
+			
+			$sum_array = [];
+
+			foreach ($m->_dsql() as $d) {
+
+				$day = date('d',strtotime($d['date']));
+				$myid = $d['client_month_year_id'];
+				$dep = $d['client_department_id'];
+				$service = $d['client_service_id'];
+				$key = $myid.'_'.$dep.'_'.$service;
+				$key_over = $key.'_over';
+
+				if(!isset( $sum_data[$key])) $sum_data[$key] =[];
+				if(!isset( $sum_data[$key_over])) $sum_data[$key_over] =[];
+
+				$sum_data[$key]['name']=$d['client_month_year'];
+				$sum_data[$key]['client_month_year_id']=$d['client_month_year_id'];
+				$sum_data[$key]['client_department_id']=$d['client_department_id'];
+				$sum_data[$key]['client_service_id']=$d['client_service_id'];
+				$sum_data[$key]['is_overtime_record']=0;
+				$sum_data[$key]['d'.$day] = $d['units_work_sum'];
+
+				$sum_data[$key_over]['name']=$d['client_month_year'];
+				$sum_data[$key_over]['client_month_year_id']=$d['client_month_year_id'];
+				$sum_data[$key_over]['client_department_id']=$d['client_department_id'];
+				$sum_data[$key_over]['client_service_id']=$d['client_service_id'];
+				$sum_data[$key_over]['is_overtime_record']=1;
+				$sum_data[$key_over]['d'.$day] = $d['units_work_sum'];
+
+			}
+
+			var_dump($sum_data);
+
 			// ==== DSQL WAY =====
-			$g->setSource($m->_dsql());
-			$g->addColumn('date');
+			$g->setSource($sum_data);
 			$g->addColumn('client_month_year_id');
-			$g->addColumn('client_month_year');
 			$g->addColumn('client_department_id');
-			$g->addColumn('client_department');
 			$g->addColumn('client_service_id');
-			$g->addColumn('client_service');
-			$g->addColumn('units_work_sum');
+			$g->addColumn('is_overtime_record');
+
+			for ($i=1; $i <= 31 ; $i++) { 
+				$g->addColumn('d'.$i);
+			}
+
+
+
 
 			// echo "<pre>";
 			// print_r($m->getRows());
