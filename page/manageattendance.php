@@ -87,19 +87,12 @@ class page_manageattendance extends \xepan\base\Page {
 		exit;
 	}
 
-	function page_save(){
-		$record_id = $_POST['record_id'];
-		$dept_id = $_POST['dept_id'];		
-		$attendance_data = $_POST['attendance'];
-		
-		$attendance_data = json_decode($attendance_data);
-		
-		/**
-		[
+	/**
+	POST Attendance Data = [
 			'client_id':,
-			client_month_year_id:,
-			department_id:,
-			attendance:[
+			'client_month_year_id':,
+			'department_id':,
+			'attendance':[
 					'labour_id_1'=>[
 							'date1'=>12
 							'date3'=>90
@@ -112,13 +105,60 @@ class page_manageattendance extends \xepan\base\Page {
 						]
 					]
 		]
-		*/
-
+	*/
+	function page_save(){
 		$return = ['status'=>'failed'];
 
-		if($record_id <= 0){
-			echo json_encode($return);
-			exit;
+		$attendance_data = $_POST['attendance_data'];
+		$attendance_data = json_decode($attendance_data,true);
+
+		$client_id = $attendance_data['client_id'];
+		$department_id = $attendance_data['department_id'];
+		$client_month_year_id = $attendance_data['client_month_year_id'];
+		$attendance = $attendance_data['attendance'];
+
+		$client_month_year_model = $this->add('xavoc\securityservices\Model_ClientMonthYear')->tryLoad($client_month_year_id);
+		if(!$client_month_year_model->loaded()){
+			return $return;
+		}
+
+		$client_department_model = $this->add('xavoc\securityservices\Model_ClientDepartment')->tryLoad($department_id);
+		if(!$client_department_model->loaded()){
+			return $return;
+		}
+
+		// default_client_service_id
+		//first delete all attendance data based on department_id and client_month_id
+		$attendance_model = $this->add('xavoc\securityservices\Model_Attendance');
+		$attendance_model->addCondition('client_month_year_id',$client_month_year_id)
+					->addCondition('client_department_id',$department_id)
+					;
+		$attendance_model->deleteAll();
+
+		//insert data
+		// INSERT INTO table_name (column1, column2, column3, ...)
+		// VALUES (value1, value2, value3, ...);
+		$month = date('m', strtotime($client_month_year_model['month_year']));
+		$year = date('Y', strtotime($client_month_year_model['month_year']));
+
+		$insert_sql = "INSERT INTO secserv_attendance (`labour_id`, `client_month_year_id`, `client_department_id`, `client_service_id`, `units_work`, `date`)VALUES";
+		foreach ($attendance as $labour_id => $sheet) {
+			foreach ($sheet as $day => $units_work) {
+
+				$date = $year.'-'.$month.'-'.$day;
+				$attendance_date = date("Y-m-d H:i:s", strtotime($date));
+				$insert_sql .= '("'.$labour_id.'", "'.$client_month_year_id.'", "'.$client_department_model->id.'", "'.$client_department_model['default_client_service_id'].'", "'.$units_work.'", "'.$attendance_date.'"),';
+			}
+		}
+		$insert_sql = trim($insert_sql,',');
+		$insert_sql .= ";";
+		
+		try{
+			$this->app->db->dsql()->expr($insert_sql)->execute();
+			$return['status'] = 'success';
+
+		}catch(Exception $e){
+
 		}
 
 		echo json_encode($return);

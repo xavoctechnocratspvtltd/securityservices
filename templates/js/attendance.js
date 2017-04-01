@@ -103,9 +103,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 				url:self.save_page,
 				type: 'POST',
 				data:{
-					attendance_data:JSON.stringify(inserted_data),
-					dept_id:self.options.selected_department_id,
-					record_id:self.options.client_month_year_id
+					attendance_data:JSON.stringify(inserted_data)
 				},
 				success: function( data ) {
 					labour_data = JSON.parse(data);
@@ -162,6 +160,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 			self.addRow(labour_data);
 		});
 
+		// additional section
 		var add_tr = $('<tr class="additional-labour-form-tr"></tr>').appendTo(self.tbody);
 		var add_form =  $('<td colspan="'+(self.options.month_days+1)+'">add additional labour</td>').appendTo(add_tr);
 		var group = $('<div class="input-group">').appendTo(add_form);
@@ -190,6 +189,9 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 			}
 
 		});
+
+		// TODO show added additional labours
+
 	},
 
 	addRow: function(labour_data){
