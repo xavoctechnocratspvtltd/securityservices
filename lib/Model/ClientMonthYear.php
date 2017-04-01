@@ -53,9 +53,8 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			$page->add('View_Error')->set('Please Generate Attendance First');
 			return;
 		}
-		
+
 		if($this->ref('xavoc\securityservices\ApprovalSheet')->count()->getOne() == 0){
-			$g = $page->add('xepan\hr\Grid');
 			$m = $this->add('xavoc\securityservices\Model_GroupedAttendance');
 			$m->addCondition('client_month_year_id',$this->id);
 			
@@ -63,7 +62,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 			foreach ($m->_dsql() as $d) {
 
-				$day = date('d',strtotime($d['date']));
+				$day = (int)date('d',strtotime($d['date']));
 				$myid = $d['client_month_year_id'];
 				$dep = $d['client_department_id'];
 				$service = $d['client_service_id'];
@@ -85,32 +84,29 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 				$sum_data[$key_over]['client_department_id']=$d['client_department_id'];
 				$sum_data[$key_over]['client_service_id']=$d['client_service_id'];
 				$sum_data[$key_over]['is_overtime_record']=1;
-				$sum_data[$key_over]['d'.$day] = $d['units_work_sum'];
-
+				$sum_data[$key_over]['d'.$day] = $d['overtime_units_work_sum'];
 			}
 
-			var_dump($sum_data);
+			$this->add('xavoc\securityservices\Model_ApprovalSheet')
+				->addCondition('client_month_year_id',$this->id)
+				->deleteAll()
+				;
 
-			// ==== DSQL WAY =====
-			$g->setSource($sum_data);
-			$g->addColumn('client_month_year_id');
-			$g->addColumn('client_department_id');
-			$g->addColumn('client_service_id');
-			$g->addColumn('is_overtime_record');
-
-			for ($i=1; $i <= 31 ; $i++) { 
-				$g->addColumn('d'.$i);
-			}
-
-
-
-
-			// echo "<pre>";
-			// print_r($m->getRows());
-			// echo "</pre>";
-			// exit;
+			$this->app->db->dsql()->table('secserv_approval_sheet')->insertAll($sum_data);
 		}
 
+		$c = $page->add('xepan\hr\CRUD');
+		$model = $this->add('xavoc\securityservices\Model_ApprovalSheet')
+			->addCondition('client_month_year_id',$this->id)
+			;
+		$c->setModel($model);
+		$c->addButton('RemoveAll')->addClass('btn btn-primary')->on('click',function($js,$data)use($model){
+			$model->deleteAll();
+			return $js->univ()->successMessage("please re-run action")->closeDialog();
+		});
+		$c->grid->removeColumn('action');
+		$c->grid->removeColumn('attachment_icon');
+		$c->grid->removeColumn('name');
 		// $this->app->redirect($this->app->url('xavoc_secserv_generateapprovalsheet',['client_monthyear_record_id'=>$this->id]));
 		
 	}
