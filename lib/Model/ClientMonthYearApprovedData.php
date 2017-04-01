@@ -12,8 +12,8 @@ class Model_ClientMonthYearApprovedData extends \xepan\base\Model_Table{
 		parent::init();
 
 		$this->hasOne('xavoc\securityservices\ClientMonthYear','client_month_year_id');
-		$this->hasOne('xavoc\securityservices\ClientDepartment','client_department_id');
-		$this->hasOne('xavoc\securityservices\ClientService','client_service_id');
+		// $this->hasOne('xavoc\securityservices\ClientDepartment','client_department_id');
+		$this->hasOne('xavoc\securityservices\BillingService','client_service_id');
 
 		$this->addField('units_approved')->hint('Approved Hours mostly');
 	}

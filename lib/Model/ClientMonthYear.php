@@ -95,18 +95,36 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			$this->app->db->dsql()->table('secserv_approval_sheet')->insertAll($sum_data);
 		}
 
-		$c = $page->add('xepan\hr\CRUD');
-		$model = $this->add('xavoc\securityservices\Model_ApprovalSheet')
-			->addCondition('client_month_year_id',$this->id)
-			;
-		$c->setModel($model);
-		$c->addButton('RemoveAll')->addClass('btn btn-primary')->on('click',function($js,$data)use($model){
+		$tabs = $page->add('Tabs');
+
+		$billing_services = $this->add('xavoc\securityservices\Model_BillingService');
+
+		$tabs_array=[];
+		$page->add('Button')->set('RemoveAll')->addClass('btn btn-primary')->on('click',function($js,$data){
+			$model = $this->add('xavoc\securityservices\Model_ApprovalSheet');
+			$model->addCondition('client_month_year_id',$this->id);
 			$model->deleteAll();
+
 			return $js->univ()->successMessage("please re-run action")->closeDialog();
 		});
-		$c->grid->removeColumn('action');
-		$c->grid->removeColumn('attachment_icon');
-		$c->grid->removeColumn('name');
+		foreach ($billing_services as $bs) {
+			$tab = $tabs->addTab($bs['name']);
+		
+			
+			$model = $this->add('xavoc\securityservices\Model_ApprovalSheet');
+			$model->addExpression('billing_service_id')->set($model->refSQL('client_service_id')->fieldQuery('billing_service_id'));
+			$model->addCondition('client_month_year_id',$this->id);
+			$model->addCondition('billing_service_id',$bs->id);
+
+			$c = $tab->add('xepan\hr\CRUD');
+			$c->setModel($model);
+			$c->grid->removeColumn('action');
+			$c->grid->removeColumn('attachment_icon');
+			$c->grid->removeColumn('name');
+
+			if($model->count()->getOne() == 0) $tab->destroy();
+		}
+
 		// $this->app->redirect($this->app->url('xavoc_secserv_generateapprovalsheet',['client_monthyear_record_id'=>$this->id]));
 		
 	}
