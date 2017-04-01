@@ -58,9 +58,9 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			$g = $page->add('xepan\hr\Grid');
 			$m = $this->add('xavoc\securityservices\Model_GroupedAttendance');
 			$m->addCondition('client_month_year_id',$this->id);
-
 			// ==== DSQL WAY =====
 			$g->setSource($m->_dsql());
+			$g->addColumn('date');
 			$g->addColumn('client_month_year_id');
 			$g->addColumn('client_month_year');
 			$g->addColumn('client_department_id');
@@ -69,6 +69,10 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			$g->addColumn('client_service');
 			$g->addColumn('units_work_sum');
 
+			// echo "<pre>";
+			// print_r($m->getRows());
+			// echo "</pre>";
+			// exit;
 		}
 
 		// $this->app->redirect($this->app->url('xavoc_secserv_generateapprovalsheet',['client_monthyear_record_id'=>$this->id]));
