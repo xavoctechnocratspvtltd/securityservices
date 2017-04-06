@@ -11,7 +11,7 @@
  Target Server Version : 100118
  File Encoding         : utf-8
 
- Date: 04/01/2017 15:23:52 PM
+ Date: 04/01/2017 18:32:32 PM
 */
 
 SET NAMES utf8;
@@ -60,7 +60,7 @@ CREATE TABLE `secserv_approval_sheet` (
   `d30` decimal(5,2) DEFAULT NULL,
   `d31` decimal(5,2) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 --  Table structure for `secserv_attendance`
@@ -73,7 +73,7 @@ CREATE TABLE `secserv_attendance` (
   `client_department_id` int(11) DEFAULT NULL,
   `client_service_id` int(11) DEFAULT NULL,
   `date` datetime NOT NULL,
-  `unit` varchar(255) NOT NULL,
+  `shift_units_work` decimal(14,2) NOT NULL,
   `units_work` decimal(5,2) NOT NULL,
   `overtime_units_work` decimal(5,2) DEFAULT NULL,
   PRIMARY KEY (`id`)
