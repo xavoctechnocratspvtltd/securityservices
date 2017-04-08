@@ -184,6 +184,14 @@ class page_manageattendance extends \xepan\base\Page {
 		$month = date('m', strtotime($client_month_year_model['month_year']));
 		$year = date('Y', strtotime($client_month_year_model['month_year']));
 
+		// all labours
+		$labours = [];
+		foreach ($this->add('xavoc\securityservices\Model_Labour')->getRows() as $key => $t_labour) {
+			if(!$t_labour['is_active']) continue;
+
+			$labours[$t_labour['id']] = $t_labour;
+		}
+
 		//insert data
 		// INSERT INTO table_name (column1, column2, column3, ...)
 		// VALUES (value1, value2, value3, ...);
@@ -195,10 +203,15 @@ class page_manageattendance extends \xepan\base\Page {
 
 				$shift_work = $units_work;
 				$overtime_work = 0;
-								
-				if($shift_work > $dept_client_shift_hours){
-					$overtime_work = $shift_work - $dept_client_shift_hours;
-					$shift_work = $dept_client_shift_hours;
+
+				$labour_shift_hours = 0;
+				if(isset($labours[$labour_id])){
+					$labour_shift_hours = $labours[$labour_id]['labour_shift_hours'];
+				}
+
+				if($shift_work > $labour_shift_hours){
+					$overtime_work = $shift_work - $labour_shift_hours;
+					$shift_work = $labour_shift_hours;
 				}
 
 				$date = $year.'-'.$month.'-'.$day;
