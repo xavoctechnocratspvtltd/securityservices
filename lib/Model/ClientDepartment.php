@@ -21,5 +21,15 @@ class Model_ClientDepartment extends \xepan\base\Model_Table{
 
 		$this->add('xavoc\securityservices\Controller_ACLFields');
 
+		$this->hasMany('xavoc\securityservices\Attendance','client_department_id');
+		$this->hasMany('xavoc\securityservices\Labour','default_client_department_id');
+		$this->addHook('beforeDelete',$this);
+
+	}
+
+	function beforeDelete($m){
+		if($this->ref('xavoc\securityservices\Labour')->count()->getOne()){
+			throw new \Exception("Department Can not delete, Please Delete the Labour, first");
+		}
 	}
 }
