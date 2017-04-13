@@ -24,6 +24,19 @@ class Model_ClientService extends \xepan\base\Model_Table{
 		$this->addField('payment_rate')->hint('payment to pay for labour per payment_base');
 
 		$this->add('xavoc\securityservices\Controller_ACLFields');
+		$this->addHook('beforeDelete',[$this,'deleteClientDepartment']);
+
+		$this->hasMany('xavoc\securityservices\ClientDepartment','default_client_service_id');
+		$this->hasMany('xavoc\securityservices\Labour','default_client_service_id');
+		$this->hasMany('xavoc\securityservices\Attendance','client_service_id');
 
 	}
+
+	function deleteClientDepartment($m){
+		$client_labour = $this->ref('xavoc\securityservices\Labour')->count()->getOne();
+		$client_department = $this->ref('xavoc\securityservices\ClientDepartment')->count()->getOne();
+		if($client_department OR $client_labour){
+			throw new \Exception("Client Services Can not delete, Please Delete the Client Department & Labour first");
+		}
+	}	
 }

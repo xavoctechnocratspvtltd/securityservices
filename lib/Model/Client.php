@@ -24,9 +24,12 @@ class Model_Client extends \xepan\base\Model_Table{
 		$this->addField('generate_mannual_invoice')->type('boolean');
 
 		$this->hasMany('xavoc\securityservices\ClientService','client_id');
-		$this->hasMany('xavoc\securityservices\ClientDepartment','client_department_id');
+		$this->hasMany('xavoc\securityservices\ClientDepartment','client_id');
+		$this->hasMany('xavoc\securityservices\Labour','default_client_id');
 
 		$this->add('xavoc\securityservices\Controller_ACLFields');
+
+		$this->addHook('beforeDelete',[$this,'deleteClientServiceAndDepartment']);
 	}
 
 	function page_services($page){
@@ -39,5 +42,15 @@ class Model_Client extends \xepan\base\Model_Table{
 		$m = $this->add('xavoc\securityservices\Model_ClientDepartment')->addCondition('client_id',$this->id);
 		$c = $page->add('xepan\base\CRUD');
 		$c->setModel($m);
+	}
+
+	function deleteClientServiceAndDepartment($m){
+		$client_l = $this->ref('xavoc\securityservices\Labour')->count()->getOne();
+		$client_services = $this->ref('xavoc\securityservices\ClientService')->count()->getOne();
+		$client_department = $this->ref('xavoc\securityservices\ClientDepartment')->count()->getOne();
+		if($client_l OR $client_services OR $client_department){
+			throw new \Exception("Client Can not delete, Please Delete the Client service & Department first");
+			
+		}
 	}
 }

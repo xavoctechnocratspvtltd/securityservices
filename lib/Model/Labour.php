@@ -22,6 +22,13 @@ class Model_Labour extends \xepan\base\Model_Table{
 		$this->addField('is_active')->type('boolean')->defaultValue(true);
 
 		$this->add('xavoc\securityservices\Controller_ACLFields');
-
+		$this->hasMany('xavoc\securityservices\Attendance','labour_id');
+		// $this->addHook('beforeDelete',$this);
 	}
+
+	// function beforeDelete($m){
+	// 	if($this->ref('xavoc\securityservices\Attendance')->count()->getOne()){
+	// 		throw new \Exception("Labour Can not delete, Please Delete the Labour Attendance first");
+	// 	}
+	// }
 }
