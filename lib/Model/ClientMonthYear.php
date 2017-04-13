@@ -19,6 +19,11 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$this->hasOne('xavoc\securityservices\Client','client_id');
 		$this->addField('name');
 		
+		$this->addField('invoice_no');
+		$this->addField('invoice_date')->type('date');
+		$this->addField('service_tax')->type('number');
+		$this->addField('service_tax_amount')->type('money');
+
 		$this->addField('month_year')->type('date');
 
 		$this->add('misc/Field_Callback','status')->set(function($m){
@@ -29,6 +34,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		
 		$this->hasMany('xavoc\securityservices\Attendance','client_month_year_id');
 		$this->hasMany('xavoc\securityservices\ApprovalSheet','client_month_year_id');
+		$this->hasMany('xavoc\securityservices\InvoiceDetail','client_month_year_id');
 
 		$this->addExpression('month')->set(function($m,$q){
 			return $q->expr('MONTH([0])',[$m->getElement('month_year')]);
@@ -38,6 +44,13 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			return $q->expr('YEAR([0])',[$m->getElement('month_year')]);
 		});
 
+		$this->addExpression('gross_amount')->set(function($m,$q){
+			return $q->expr('IFNULL([0],0)',[$m->refSQL('xavoc\securityservices\InvoiceDetail')->sum('amount')]);
+		});
+
+		$this->addExpression('net_amount')->set(function($m,$q){
+			return $q->expr('([0]- IFNULL([1],0))',[$m->getElement('gross_amount'),$m->getElement('service_tax_amount')]);
+		});
 		$this->is([
 				'month_year|to_trim|required'
 			]);
@@ -137,14 +150,27 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 	}
 
 	function page_generate_invoice($page){
-		
 
 		$tabs = $page->add('Tabs');
 		$invoice_tab = $tabs->addTab('Invoice Data');
 		$approved_tab = $tabs->addTab('Approved Units');
 
+		$form = $invoice_tab->add('Form')->addClass('main-box')->setStyle('padding','10px;');
+		$form->add('View')->setElement('h3')->set('Invoice Information');
+
+		$form->addField('invoice_no')->validate('required')->set($this['invoice_no']);
+		$form->addField('DatePicker','invoice_date')->validate('required')->set($this['invoice_date']);
+		$form->addSubmit('Save');
+
+		if($form->isSubmitted()){
+			$this['invoice_no'] = $form['invoice_no'];
+			$this['invoice_date'] = $form['invoice_date'];
+			$this->save();
+			return $form->js(true,$form->js()->univ()->successMessage('Saved'))->reload();
+		}
+
+		$invoice_tab->add('View')->setElement('h3')->set('Invoice Item');
 		$c = $invoice_tab->add('xepan\base\CRUD');
-		
 		$recalc_btn = $c->addButton('Re Calculate')->addClass('btn btn-primary');
 		$recalc_btn->on('click',function($js,$data)use($c){
 			$this->calculateInvoiceData();

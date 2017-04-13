@@ -18,6 +18,8 @@ class Model_Client extends \xepan\base\Model_Table{
 	function init(){
 		parent::init();
 
+		$this->hasOne('xavoc\securityservices\Layout','invoice_layout_id');
+
 		$this->addField('name');
 		$this->addField('status');
 		$this->addField('service_tax')->type('number');
