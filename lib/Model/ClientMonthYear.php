@@ -18,13 +18,13 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 		$this->hasOne('xavoc\securityservices\Client','client_id');
 		$this->addField('name');
-		
-		$this->addField('invoice_no');
-		$this->addField('invoice_date')->type('date');
-		$this->addField('service_tax')->type('number');
-		$this->addField('service_tax_amount')->type('money');
-
 		$this->addField('month_year')->type('date');
+		
+		$this->addField('invoice_no')->defaultValue($this->newNumber());
+		$this->addField('invoice_date')->type('date')->defaultValue($this->app->today);
+
+		$this->addField('service_tax')->type('number');
+		// $this->addField('service_tax_amount')->type('money');
 
 		$this->add('misc/Field_Callback','status')->set(function($m){
 			return "All";
@@ -48,10 +48,20 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			return $q->expr('IFNULL([0],0)',[$m->refSQL('xavoc\securityservices\InvoiceDetail')->sum('amount')]);
 		});
 
+		$this->addExpression('service_tax_amount')->set(function($m,$q){
+			return $q->expr('(IFNULL([service_tax],0) * IFNULL([gross_amount],0)/100)',['service_tax'=>$m->getElement('service_tax'),'gross_amount'=>$m->getElement('gross_amount')]);
+		})->type('money');
+
 		$this->addExpression('net_amount')->set(function($m,$q){
 			return $q->expr('([0]- IFNULL([1],0))',[$m->getElement('gross_amount'),$m->getElement('service_tax_amount')]);
-		});
+		})->type('money');
+
+		$this->addExpression('status')->set('"All"');
 		$this->is([
+				'client_id|to_trim|required',
+				'name|to_trim|required',
+				'invoice_no|to_trim|required',
+				'invoice_date|to_trim|required',
 				'month_year|to_trim|required'
 			]);
 	}
@@ -66,6 +76,15 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			$page->add('View_Error')->set('Please Generate Attendance First');
 			return;
 		}
+
+		$view = $page->add('View')->addClass('main-box');
+		$view->add('Button')->set('Click to Remove All Approval Sheet for Re-generate')->addClass('btn btn-primary')->on('click',function($js,$data){
+			$model = $this->add('xavoc\securityservices\Model_ApprovalSheet');
+			$model->addCondition('client_month_year_id',$this->id);
+			$model->deleteAll();
+
+			return $js->univ()->successMessage('please re-run action "Generate Approval sheet"')->closeDialog();
+		});
 
 		if($this->ref('xavoc\securityservices\ApprovalSheet')->count()->getOne() == 0){
 			$m = $this->add('xavoc\securityservices\Model_GroupedAttendance');
@@ -113,13 +132,6 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$billing_services = $this->add('xavoc\securityservices\Model_BillingService');
 
 		$tabs_array=[];
-		$page->add('Button')->set('RemoveAll')->addClass('btn btn-primary')->on('click',function($js,$data){
-			$model = $this->add('xavoc\securityservices\Model_ApprovalSheet');
-			$model->addCondition('client_month_year_id',$this->id);
-			$model->deleteAll();
-
-			return $js->univ()->successMessage("please re-run action")->closeDialog();
-		});
 		foreach ($billing_services as $bs) {
 			$tab = $tabs->addTab($bs['name']);
 		
@@ -129,13 +141,15 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			$model->addCondition('client_month_year_id',$this->id);
 			$model->addCondition('billing_service_id',$bs->id);
 
-			$c = $tab->add('xepan\hr\CRUD');
-			$c->setModel($model);
-			$c->grid->removeColumn('action');
-			$c->grid->removeColumn('attachment_icon');
-			$c->grid->removeColumn('name');
-
-			if($model->count()->getOne() == 0) $tab->destroy();
+			if($model->count()->getOne() == 0){
+				$tab->add('View_Error')->set('no record found');
+			}else{
+				$c = $tab->add('xepan\hr\CRUD');
+				$c->setModel($model);
+				$c->grid->removeColumn('action');
+				$c->grid->removeColumn('attachment_icon');
+				$c->grid->removeColumn('name');
+			}
 		}
 
 		// $this->app->redirect($this->app->url('xavoc_secserv_generateapprovalsheet',['client_monthyear_record_id'=>$this->id]));
@@ -230,4 +244,9 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$attendance_model->setOrder('labour','asc');
 		return $attendance_model;
 	}
+
+	function newNumber(){
+		return $this->_dsql()->del('fields')->field('max(CAST(invoice_no AS decimal))')->getOne() + 1 ;
+	}
+
 }

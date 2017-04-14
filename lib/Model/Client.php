@@ -21,7 +21,7 @@ class Model_Client extends \xepan\base\Model_Table{
 		$this->hasOne('xavoc\securityservices\Layout','invoice_layout_id');
 
 		$this->addField('name');
-		$this->addField('status');
+		$this->addField('status')->enum(['Active','InActive'])->defaultValue('Active');
 		$this->addField('service_tax')->type('number');
 		$this->addField('generate_mannual_invoice')->type('boolean');
 
@@ -38,12 +38,14 @@ class Model_Client extends \xepan\base\Model_Table{
 		$m = $this->add('xavoc\securityservices\Model_ClientService')->addCondition('client_id',$this->id);
 		$c = $page->add('xepan\base\CRUD');
 		$c->setModel($m);
+		$c->grid->removeColumn('created_by');
 	}
 
 	function page_departments($page){
 		$m = $this->add('xavoc\securityservices\Model_ClientDepartment')->addCondition('client_id',$this->id);
 		$c = $page->add('xepan\base\CRUD');
 		$c->setModel($m);
+		$c->grid->removeColumn('created_by');
 	}
 
 	function deleteClientServiceAndDepartment($m){

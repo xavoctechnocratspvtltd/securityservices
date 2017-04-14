@@ -11,7 +11,7 @@ class page_monthrecords extends \xepan\base\Page {
 		parent::init();
 
 		$c = $this->add('xepan\hr\CRUD');
-		$c->setModel('xavoc\securityservices\ClientMonthYear');
+		$c->setModel('xavoc\securityservices\ClientMonthYear',['client_id','name','invoice_no','invoice_date','month_year','gross_amount','service_tax','service_tax_amount','net_amount'],['client','name','invoice_no','invoice_date','month_year','gross_amount','service_tax_amount','net_amount','status']);
 
 		if($c->isEditing()){
 			$form = $c->form;
@@ -26,6 +26,6 @@ class page_monthrecords extends \xepan\base\Page {
 		$c->grid->removeColumn('status');
 		$c->grid->removeColumn('created_by');
 		$c->grid->removeColumn('attachment_icon');
-
+		$c->js(true)->find('.main-box-body > div.table')->removeClass('table-responsive');
 	}
 }

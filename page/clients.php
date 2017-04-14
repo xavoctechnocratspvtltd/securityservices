@@ -27,7 +27,8 @@ class page_clients extends \xepan\base\Page {
 									);
 		});
 
-		$c->setModel($model);
-
+		$c->setModel($model,['name','service_tax','generate_mannual_invoice','invoice_layout','status','invoice_layout_id'],['name','service_tax','generate_mannual_invoice','invoice_layout','status']);
+		$c->grid->removeColumn('status');
+		$c->grid->removeColumn('attachment_icon');
 	}
 }

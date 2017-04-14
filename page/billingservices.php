@@ -11,7 +11,9 @@ class page_billingservices extends \xepan\base\Page {
 		parent::init();
 
 		$c = $this->add('xepan\hr\CRUD');
-		$c->setModel('xavoc\securityservices\BillingService');
+		$c->setModel('xavoc\securityservices\BillingService',['name']);
 
+		$c->grid->removeColumn('action');
+		$c->grid->removeColumn('attachment_icon');
 	}
 }
