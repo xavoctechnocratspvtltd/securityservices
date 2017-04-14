@@ -22,7 +22,7 @@ class Model_Labour extends \xepan\base\Model_Table{
 		$this->addField('is_active')->type('boolean')->defaultValue(true);
 
 		$this->add('xavoc\securityservices\Controller_ACLFields');
-		$this->hasMany('xavoc\securityservices\Attendance','labour_id');
+		$this->hasMany('xavoc\securityservices\Attendance','labour_id',null,'Attendance');
 		// $this->addHook('beforeDelete',$this);
 	}
 

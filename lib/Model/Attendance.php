@@ -32,5 +32,17 @@ class Model_Attendance extends \xepan\base\Model_Table{
 			return $q->expr('YEAR([0])',[$m->getElement('date')]);
 		});
 
+		$this->addExpression('payment_rate')->set(function($m,$q){
+			return $m->refSql('client_service_id')->fieldQuery('payment_rate');
+		});
+
+		$this->addExpression('payment_base')->set(function($m,$q){
+			return $m->refSql('client_service_id')->fieldQuery('payment_base');
+		});
+
+		$this->addExpression('labour_shift_hours')->set(function($m,$q){
+			return $m->refSql('client_service_id')->fieldQuery('labour_shift_hours');
+		});
+
 	}
 }

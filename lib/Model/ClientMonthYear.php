@@ -11,7 +11,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 	public $status=['All'];
 
-	public $actions=['All'=>['view','edit','delete','manage_attendance','generate_approval_sheet','approved_service_data','generate_invoice','print_invoice','print_invoice_attachment']];
+	public $actions=['All'=>['view','edit','delete','manage_attendance','generate_approval_sheet','approved_service_data','generate_invoice','print_invoice','print_invoice_attachment','labour_payment']];
 
 	function init(){
 		parent::init();
@@ -249,4 +249,24 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		return $this->_dsql()->del('fields')->field('max(CAST(invoice_no AS decimal))')->getOne() + 1 ;
 	}
 
+	function page_labour_payment($page){
+		$page->add('View')->set('Labour Payment sheet');
+
+		$tabs = $page->add('Tabs');
+		$client_services = $this->add('xavoc\securityservices\Model_ClientService');
+		$client_services->addCondition('client_id',$this['client_id']);
+		
+		foreach ($client_services as $cs) {
+
+			$tab = $tabs->addTab($cs['name']);
+
+			$labour_payment = $this->add('xavoc\securityservices\Model_LabourPaymant',['client_month_year_record_id'=>$this->id,'client_service_id'=>$cs['id']]);
+			$grid = $tab->add('xepan\hr\Grid');
+			$grid->setModel($labour_payment,['name','total_unit_work','payment_rate','payment_base','labour_shift_hours','net_payable','days_of_month']);
+			
+			$grid->removeColumn('action');
+			$grid->removeColumn('attachment_icon');
+		}
+
+	}
 }
