@@ -201,3 +201,9 @@ CREATE TABLE `secserv_labour` (
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- update query for client month record
+ALTER TABLE `secserv_client_monthyear_record` ADD COLUMN `invoice_no` int(11);
+ALTER TABLE `secserv_client_monthyear_record` ADD COLUMN `invoice_date` date DEFAULT NULL;
+ALTER TABLE `secserv_client_monthyear_record` ADD COLUMN `service_tax` decimal(5,2) DEFAULT NULL;
