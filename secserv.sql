@@ -208,6 +208,8 @@ ALTER TABLE `secserv_client_monthyear_record` ADD COLUMN `invoice_no` int(11);
 ALTER TABLE `secserv_client_monthyear_record` ADD COLUMN `invoice_date` date DEFAULT NULL;
 ALTER TABLE `secserv_client_monthyear_record` ADD COLUMN `service_tax` decimal(5,2) DEFAULT NULL;
 
+-- client record updated
+ALTER TABLE `secserv_client` ADD COLUMN `invoice_layout_id` int(11) DEFAULT NULL;
 /*
 Navicat MySQL Data Transfer
 
