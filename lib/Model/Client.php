@@ -20,10 +20,15 @@ class Model_Client extends \xepan\base\Model_Table{
 
 		$this->hasOne('xavoc\securityservices\Layout','invoice_layout_id');
 
-		$this->addField('name');
-		$this->addField('status')->enum(['Active','InActive'])->defaultValue('Active');
+		$this->addField('name')->caption('organization name');
+		$this->addField('owner_name')->caption('Owner/ Manager name');
+		$this->addField('address')->type('text');
+		$this->addField('tin_no');
+		$this->addField('mobile_no');
+		$this->addField('email_id');
 		$this->addField('service_tax')->type('number');
 		$this->addField('generate_mannual_invoice')->type('boolean');
+		$this->addField('status')->enum(['Active','InActive'])->defaultValue('Active');
 
 		$this->hasMany('xavoc\securityservices\ClientService','client_id');
 		$this->hasMany('xavoc\securityservices\ClientDepartment','client_id');

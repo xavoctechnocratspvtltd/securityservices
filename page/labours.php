@@ -11,7 +11,10 @@ class page_labours extends \xepan\base\Page {
 		parent::init();
 
 		$c = $this->add('xepan\hr\CRUD');
-		$c->setModel('xavoc\securityservices\Labour');
+		$c->setModel('xavoc\securityservices\Labour',
+				['name','address','dob','gender','mobile_no','email_id','guardian_name','bank_name','bank_account_no','bank_ifsc_code','bank_branch','default_client_id','default_client_service_id','default_client_department_id','labour_shift_hours','is_active'],
+				['name','mobile_no','bank_name','bank_account_no','bank_ifsc_code','bank_branch','labour_shift_hours','is_active','default_client']
+			);
 
 		$c->grid->removeColumn('created_by');
 		$c->grid->removeColumn('action');
