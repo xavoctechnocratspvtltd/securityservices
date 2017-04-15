@@ -135,7 +135,6 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		foreach ($billing_services as $bs) {
 			$tab = $tabs->addTab($bs['name']);
 		
-			
 			$model = $this->add('xavoc\securityservices\Model_ApprovalSheet');
 			$model->addExpression('billing_service_id')->set($model->refSQL('client_service_id')->fieldQuery('billing_service_id'));
 			$model->addCondition('client_month_year_id',$this->id);
@@ -149,6 +148,102 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 				$c->grid->removeColumn('action');
 				$c->grid->removeColumn('attachment_icon');
 				$c->grid->removeColumn('name');
+				$export = $c->grid->addButton('Export CSV');
+				$export->js('click')->univ()->newWindow($c->app->url(null,['download_csv_file'=>true]));
+
+				if($_GET['download_csv_file']){
+					$rows = $model->getRows();
+					
+					$days_in_month = date('t',strtotime($this['month_year']));
+
+					// final csv_row array
+					$csv_rows = [];
+					$csv_rows['total_hours'] = ['s_no'=>'','name'=>'total_hours'];
+					$csv_rows['total_overtime'] = ['s_no'=>'','name'=>'total_overtime'];
+					$csv_rows['total']= ['s_no'=>'','name'=>'total'];
+					$header = ['s no','name'];
+					for ($i=1; $i <=$days_in_month; $i++) { 
+						$csv_rows['total_hours'][$i] = 0;	
+						$csv_rows['total_overtime'][$i] = 0;	
+						$csv_rows['total'][$i] = 0;	
+						$header[]= $i;	
+					}
+					$header[] = 'total_hours';
+					
+
+					$s_no = 1;
+					foreach ($rows as $key => $month_record) {
+						$csv_rows[$key] = [
+											's_no'=>$s_no,
+											'name'=>$month_record['client_department']
+										];
+
+						$total_hours = 0;
+						$is_overtime_record = $month_record['is_overtime_record'];
+
+						foreach($month_record as $day => $unit_work) {
+							if(!in_array($day, ['d1','d2','d3','d4','d5','d6','d7','d8','d9','d10','d11','d12','d13','d14','d15','d16','d17','d18','d19','d20','d21','d22','d23','d24','d25','d26','d27','d28','d29','d30','d31'])) continue;
+							
+							$day_number = str_replace("d", "", $day);
+							if($day_number > $days_in_month) continue;
+
+							$csv_rows[$key][$day_number] = $unit_work;
+	
+							// row total
+							$total_hours += $unit_work;
+
+							// day total
+							if($is_overtime_record){
+								$csv_rows['total_overtime'][$day_number] += $unit_work;
+								$csv_rows['total_overtime']['total_hours'] += $csv_rows['total_overtime'][$day_number];
+							}else{
+								$csv_rows['total_hours'][$day_number] += $unit_work;
+								$csv_rows['total_hours']['total_hours'] += $csv_rows['total_hours'][$day_number];
+							}
+
+							$csv_rows['total'][$day_number] += $unit_work;
+						}
+
+						$csv_rows[$key]['total_hours'] = $total_hours;
+						$csv_rows['total']['total_hours'] += $total_hours;
+
+						if($is_overtime_record){
+							$s_no ++;
+						}else{
+							$csv_rows[$key]['s_no'] = "";
+							$csv_rows[$key]['name'] = "overtime ".$month_record['client_department'];
+						}
+					}
+
+					// move total row to at last row
+					$temp = $csv_rows['total_hours'];
+					unset($csv_rows['total_hours']);
+					$csv_rows['total_hours'] = $temp;
+
+					$temp = $csv_rows['total_overtime'];
+					unset($csv_rows['total_overtime']);
+					$csv_rows['total_overtime'] = $temp;
+					
+					$temp = $csv_rows['total'];
+					unset($csv_rows['total']);
+					$csv_rows['total'] = $temp;
+
+					$output = implode(",", $header);
+					$fp = fopen("php://output", "w");
+					fputcsv ($fp, $header, "\t");
+					foreach($csv_rows as $key=>$row){
+						fputcsv($fp, $row, "\t");
+					}
+					fclose($fp);
+
+					$file_name = $this['invoice_no']."_".$this['client']."_".$this['month']."_".$this['year'].".csv";
+			    	header("Content-type: text/csv");
+			        header('Content-disposition: attachment; filename="'+$file_name+'"');
+			        // header("Content-Length: " . strlen($output));
+			        header("Content-Transfer-Encoding: binary");
+			        // print $output;
+			        exit;
+				}
 			}
 		}
 
@@ -262,10 +357,11 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 			$labour_payment = $this->add('xavoc\securityservices\Model_LabourPaymant',['client_month_year_record_id'=>$this->id,'client_service_id'=>$cs['id']]);
 			$grid = $tab->add('xepan\hr\Grid');
-			$grid->setModel($labour_payment,['name','total_unit_work','payment_rate','payment_base','labour_shift_hours','net_payable','days_of_month']);
+			$grid->setModel($labour_payment,['name','total_unit_work','payment_rate','payment_base','days_of_month','labour_shift_hours','net_payable']);
 			
 			$grid->removeColumn('action');
 			$grid->removeColumn('attachment_icon');
+			$grid->removeColumn('days_of_month');
 		}
 
 	}
