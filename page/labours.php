@@ -7,8 +7,8 @@ class page_labours extends \xepan\base\Page {
 	
 	public $title ="Labours";
 
-	function init(){
-		parent::init();
+	function page_index(){
+		// parent::init();
 
 		$c = $this->add('xepan\hr\CRUD');
 		$c->setModel('xavoc\securityservices\Labour',
@@ -38,5 +38,83 @@ class page_labours extends \xepan\base\Page {
 
 		}
 
+		/**			
+		CSV Importer
+		*/
+		$import_btn=$c->grid->addButton('Import CSV')->addClass('btn btn-primary');
+		$import_btn->setIcon('ui-icon-arrowthick-1-n');
+		$import_btn->js('click')
+			->univ()
+			->frameURL(
+					'Import CSV',
+					$this->app->url('./import')
+					);
+	}
+
+	function page_import(){
+
+		$form = $this->add('Form');
+		$form->addSubmit('Download Sample File');
+		
+		if($_GET['download_sample_csv_file']){
+			$output = ['name','labour_shift_hours','address','dob','gender','mobile_no','email_id','guardian_name','bank_name','bank_account_no','bank_ifsc_code','bank_branch','is_active','default_client','default_client_service','default_client_department'];
+
+			$output = implode(",", $output);
+	    	header("Content-type: text/csv");
+	        header("Content-disposition: attachment; filename=\"sample_labour_import.csv\"");
+	        header("Content-Length: " . strlen($output));
+	        header("Content-Transfer-Encoding: binary");
+	        print $output;
+	        exit;
+		}
+
+		if($form->isSubmitted()){
+			$form->js()->univ()->newWindow($form->app->url('xavoc_secserv_labours_import',['download_sample_csv_file'=>true]))->execute();
+		}
+
+		$this->add('View')->setElement('iframe')->setAttr('src',$this->api->url('./execute',array('cut_page'=>1)))->setAttr('width','100%');
+	}
+
+	function page_import_execute(){
+
+		ini_set('max_execution_time', 0);
+		$form= $this->add('Form');
+		$form->template->loadTemplateFromString("<form method='POST' action='".$this->api->url(null,array('cut_page'=>1))."' enctype='multipart/form-data'>
+			<input type='file' name='csv_labour_file'/>
+			<input type='submit' value='Upload'/>
+			</form>"
+			);
+
+		if($_FILES['csv_labour_file']){
+			if ( $_FILES["csv_labour_file"]["error"] > 0 ) {
+				$this->add( 'View_Error' )->set( "Error: " . $_FILES["csv_labour_file"]["error"] );
+			}else{
+				$mimes = ['text/comma-separated-values', 'text/csv', 'application/csv', 'application/excel', 'application/vnd.ms-excel', 'application/vnd.msexcel', 'text/anytext'];
+				if(!in_array($_FILES['csv_labour_file']['type'],$mimes)){
+					$this->add('View_Error')->set('Only CSV Files allowed');
+					return;
+				}
+
+				$importer = new \xepan\base\CSVImporter($_FILES['csv_labour_file']['tmp_name'],true,',');
+				$data = $importer->get();
+				$lead = $this->add('xavoc\securityservices\Model_Labour');
+				$old_record_count = $lead->count()->getOne();
+				try{
+					$this->api->db->beginTransaction();
+					
+					$lead->importFromCSV($data);
+					
+					$this->api->db->commit();
+					
+					$new_record_count = $lead->count()->getOne();
+					$this->add('View_Info')->set('Total Records : '.($new_record_count - $old_record_count));
+				}catch(\Exception $e){
+					$this->api->db->rollback();
+
+					$this->add('View_Error')->set($e->getMessage());
+				}
+
+			}
+		}
 	}
 }
