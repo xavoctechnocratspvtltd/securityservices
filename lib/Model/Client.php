@@ -47,10 +47,16 @@ class Model_Client extends \xepan\base\Model_Table{
 	}
 
 	function page_departments($page){
-		$m = $this->add('xavoc\securityservices\Model_ClientDepartment')->addCondition('client_id',$this->id);
+		$m = $this->add('xavoc\securityservices\Model_ClientDepartment');
+		$m->addCondition('client_id',$this->id);
+		
 		$c = $page->add('xepan\base\CRUD');
 		$c->setModel($m);
 		$c->grid->removeColumn('created_by');
+		if($c->isEditing()){
+			$form = $c->form;
+			$form->getElement('default_client_service_id')->getModel()->addCondition('client_id',$this->id);
+		}
 	}
 
 	function deleteClientServiceAndDepartment($m){
