@@ -13,13 +13,13 @@ class page_labours extends \xepan\base\Page {
 		$c = $this->add('xepan\hr\CRUD');
 		$c->setModel('xavoc\securityservices\Labour',
 				['name','address','dob','gender','mobile_no','email_id','guardian_name','bank_name','bank_account_no','bank_ifsc_code','bank_branch','default_client_id','default_client_service_id','default_client_department_id','labour_shift_hours','is_active'],
-				['name','mobile_no','bank_name','bank_account_no','bank_ifsc_code','bank_branch','labour_shift_hours','is_active','default_client']
+				['name','mobile_no','bank_name','bank_account_no','bank_ifsc_code','bank_branch','labour_shift_hours','is_active','default_client','default_client_service','default_client_department']
 			);
 
 		$c->grid->removeColumn('created_by');
 		$c->grid->removeColumn('action');
 		$c->grid->removeColumn('attachment_icon');
-		
+		$c->grid->addPaginator($ipp=50);
 		$this->app->stickyGET('client_id');
 
 		if($c->isEditing()){
@@ -35,7 +35,7 @@ class page_labours extends \xepan\base\Page {
 			
 			$field_client->js('change',$form->js()->atk4_form('reloadField','default_client_service_id',[$this->app->url(),'d_client_id'=>$field_client->js()->val()]));
 			$field_service->js('change',$form->js()->atk4_form('reloadField','default_client_department_id',[$this->app->url(),'d_service_id'=>$field_service->js()->val()]));
-
+			
 		}
 
 		/**			

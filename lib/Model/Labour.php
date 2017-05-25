@@ -39,50 +39,64 @@ class Model_Labour extends \xepan\base\Model_Table{
 		if(!is_array($data) OR !count($data) ) throw new \Exception("no one record found in your csv", 1);
 		
 		// make array of all clients
-		$d_client = $this->add('xavoc\securityservices\Model_Client')->addCondition('status','Active')->getRows();
+		$d_client = $this->add('xavoc\securityservices\Model_Client')->getRows();
 		$client_data = [];
 		foreach ($d_client as $key => $c_data) {
-			$client_data[$c_data['name']] = $c_data;
+			$client_data[trim($c_data['name'])] = $c_data;
 			
 			$c_services = $this->add('xavoc\securityservices\Model_ClientService')->addCondition('client_id',$c_data['id'])->getRows();
 			$temp_service = [];
 			foreach ($c_services as $key => $service) {
-				$temp_service[$service['name']] = $service;
+				$temp_service[trim($service['name'])] = $service;
 				
 				$c_department = $this->add('xavoc\securityservices\Model_ClientDepartment');
 				$c_department->addCondition('default_client_service_id',$service['id']);
 				$c_department = $c_department->getRows();
 				$department = [];
 				foreach ($c_department as $key => $dept) {
-					$department[$dept['name']] = $dept;
+					$department[trim($dept['name'])] = $dept;
 				}
-				$temp_service['departments'] = $department;
+				$temp_service[trim($service['name'])]['departments'] = $department;
 			}
-			$client_data['services'] = $temp_service;
+			$client_data[trim($c_data['name'])]['services'] = $temp_service;
 		}
-		
+			
+		// echo "<pre>";
+		// print_r($client_data);
+		// echo "</pre>";
+		// die();
+
 		foreach ($data as $key => $labour_data) {
 
 			$labour_model = $this->add('xavoc\securityservices\Model_Labour');
 			foreach ($labour_data as $field_name => $value) {
 				if(in_array($field_name, ['default_client','default_client_service','default_client_department'])) continue;
-				$labour_model[$field_name] = $value;
+
+				if($field_name == "gender") $value = strtolower($value);
+				$labour_model[trim($field_name)] = $value;
 			}
 
 			$d_c_id = 0; 
-			if($labour_data['default_client'] AND isset($client_data[$labour_data['default_client']]) ){
+			if($labour_data['default_client'] AND isset($client_data[trim($labour_data['default_client'])]) ){
 				$d_c_id = $client_data[$labour_data['default_client']]['id'];
 			}
 
 			$d_c_s_id = 0;
-			if($labour_data['default_client_service'] && $d_c_id && isset($client_data[$labour_data['default_client']]['services'][$labour_data['default_client_service']])){
-				$d_c_s_id = $client_data[$labour_data['default_client']]['services'][$labour_data['default_client_service']]['id'];
+			if($labour_data['default_client_service'] && $d_c_id && isset($client_data[trim($labour_data['default_client'])]['services'][trim($labour_data['default_client_service'])])){
+				$d_c_s_id = $client_data[trim($labour_data['default_client'])]['services'][trim($labour_data['default_client_service'])]['id'];
 			}
 
+			// echo "data department = ".$labour_data['default_client_department']."<br/>";
+			// echo "<pre>";
+			// print_r($client_data[trim($labour_data['default_client'])]['services'][trim($labour_data['default_client_service'])]['departments'][trim($labour_data['default_client_department'])]);
+			// echo "</pre>";
+
 			$d_c_d_id = 0;
-			if($labour_data['default_client_department'] && $d_c_s_id && isset($client_data[$labour_data['default_client']]['services'][$labour_data['default_client_service']]['departments'][$labour_data['default_client_department']] )){
-				$d_c_s_id = $client_data[$labour_data['default_client']]['services'][$labour_data['default_client_service']]['departments'][$labour_data['default_client_department']]['id'];
+			if($labour_data['default_client_department'] && $d_c_s_id && isset($client_data[trim($labour_data['default_client'])]['services'][trim($labour_data['default_client_service'])]['departments'][trim($labour_data['default_client_department'])])){
+				$d_c_d_id = $client_data[trim($labour_data['default_client'])]['services'][trim($labour_data['default_client_service'])]['departments'][trim($labour_data['default_client_department'])]['id'];
 			}
+
+			// echo "def d id = ".$d_c_d_id."<br/>";
 
 			$labour_model['default_client_id'] = $d_c_id;
 			$labour_model['default_client_service_id'] = $d_c_s_id;
