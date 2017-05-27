@@ -11,7 +11,8 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		default_labours:{},
 		additional_labours:{},
 		remaining_all_labours:{},
-		used_labours:{}
+		used_labours:{},
+		content_changed:false
 	},
 
 	_create:function(){
@@ -26,14 +27,23 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		var self = this;
 
 		self.wrapper = wrapper = $('<div class="sec-attendance-widget"></div>').appendTo(self.element);
-		self.widget_header = $('<div class="sec-widget-header main-box">').appendTo(self.wrapper);
+		self.widget_header = $('<div class="sec-widget-header">').appendTo(self.wrapper);
+		self.widget_row = $('<div class="row">').appendTo(self.widget_header);
+		self.widget_row_col1 = $('<div class="col-md-6 col-sm-6">').appendTo(self.widget_row);
+		self.widget_row_col2 = $('<div class="col-md-6 col-sm-6">').appendTo(self.widget_row);
+
 		self.table = table = $('<table class="sec-employee-attendance data" border="1"></table>').appendTo(self.wrapper);
 		self.thead = thead = $('<thead class="sec-header">').appendTo(table);
 		self.thead_tr = thead_tr = $('<tr>').appendTo(thead);
 		self.tbody = tbody = $('<tbody class="sec-attendance">').appendTo(table);
 		self.widget_footer = $('<div class="sec-widget-footer">').appendTo(self.wrapper);
 
-		var department = $("<select>").appendTo(self.widget_header);
+		// auto save section
+		$('<div class="autosave-box">').appendTo(self.widget_row_col2);
+
+		// client department section
+		$("<p>Client Department: </p>").appendTo(self.widget_row_col1);
+		var department = $('<select class="main-box">').appendTo(self.widget_row_col1);
 		var dept_option = '<option value="0">Please Select Client Department</option>';
 		$.each(self.options.client_departments,function(index,dept){
 			dept_option += '<option value="'+dept.id+'">'+dept.name+'</option>';
@@ -76,48 +86,63 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 	addSaveButton: function(){
 		var self = this;
 
-		$save_btn = $('<button class="btn btn-primary">Save</button>').appendTo(self.widget_footer);
+		$save_btn = $('<button class="btn btn-primary secser-savebutton">Save</button>').appendTo(self.widget_footer);
 
 		$save_btn.click(function(){
-			var inserted_data = {};
-			inserted_data.client_id = self.options.client_id;
-			inserted_data.client_month_year_id = self.options.client_month_year_id;
-			inserted_data.department_id = self.options.selected_department_id;
-			inserted_data.attendance = {};
+			self.save();
+		});
+	},
 
-			$(self.element).find('tbody.sec-attendance tr').each(function(index,current_tr){
-				if($(current_tr).hasClass('additional-labour-form-tr')){
-					return;
-				} ;
+	save: function(auto_save=false){
 
-				curr_labour_id = $(current_tr).attr('data-labour_id');
-				inserted_data.attendance[""+curr_labour_id] = {};
+		var self = this;
+		
+		var inserted_data = {};
+		inserted_data.client_id = self.options.client_id;
+		inserted_data.client_month_year_id = self.options.client_month_year_id;
+		inserted_data.department_id = self.options.selected_department_id;
+		inserted_data.attendance = {};
 
-				$(current_tr).find('td').each(function(index,current_td){
-					curr_date = $(current_td).attr('data-date');
-					inserted_data['attendance'][""+curr_labour_id][""+curr_date] = ($(current_td).find('input').val())?$(current_td).find('input').val():0;
-				});
+		$(self.element).find('tbody.sec-attendance tr').each(function(index,current_tr){
+			if($(current_tr).hasClass('additional-labour-form-tr')){
+				return;
+			} ;
+
+			curr_labour_id = $(current_tr).attr('data-labour_id');
+			inserted_data.attendance[""+curr_labour_id] = {};
+
+			$(current_tr).find('td').each(function(index,current_td){
+				curr_date = $(current_td).attr('data-date');
+				inserted_data['attendance'][""+curr_labour_id][""+curr_date] = ($(current_td).find('input').val())?$(current_td).find('input').val():0;
 			});
+		});
 
-			$.ajax({
-				url:self.save_page,
-				type: 'POST',
-				data:{
-					attendance_data:JSON.stringify(inserted_data)
-				},
-				success: function( data ) {
-					labour_data = JSON.parse(data);
-					if(labour_data.status == "failed"){
-						$.univ().errorMessage('not saved');
-						return;
+		$.ajax({
+			url:self.save_page,
+			type: 'POST',
+			data:{
+				attendance_data:JSON.stringify(inserted_data)
+			},
+			success: function( data ) {
+				labour_data = JSON.parse(data);
+				if(labour_data.status == "failed"){
+					if(auto_save){
+						$('.autosave-box').html('<div class="text-danger">Content Not Saved..</div>');
+					}else{
+						$.univ().errorMessage('not saved');	
+					}
+					return;
+				}else{
+					if(auto_save){
+						$('.autosave-box').html('<div class="text-success">Content Auto Saved.</div>');
 					}else{
 						$.univ().successMessage('saved successfully');
 					}
-	          	},
-	          	error: function(XMLHttpRequest, textStatus, errorThrown) {
-	              alert("Error getting prospect list: " + textStatus);
-	            }
-			});
+				}
+          	},
+          	error: function(XMLHttpRequest, textStatus, errorThrown) {
+              alert("Error getting prospect list: " + textStatus);
+            }
 		});
 	},
 
@@ -210,7 +235,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 			units_work = month_attendance[i];
 			if(units_work == undefined)
 				units_work = 0;
-			tr_html += '<td data-date="'+i+'" class="labour_units_work" ><input value="'+units_work+'"/></td>';
+			tr_html += '<td data-date="'+i+'" class="labour_units_work" ><input class="secser-attendance-hour" type="text" value="'+units_work+'"/></td>';
 		}
 
 		tr_html += "</tr>";
@@ -222,31 +247,85 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 	addLiveEvent: function(){
 		var self = this;
 
-		$(self.element).find('input').keydown(function(e){
-			switch(e.which){
-				case 37: //left arrow key
-					// alert('left');
-				break;
+		$(self.element).find('input').livequery(function(){
+			$(this).keydown(function(e){
 
-				case 38: //up arrow key
-					var col = $(this).closest('tr').find('input').index($(this));
-					var prev_row = $(this).closest('tr').prev();
-					if(prev_row.length ===0) return;
-					$(prev_row).find('input').eq(col).focus();
-				break;
+				$(this).closest('tr').removeClass('bg-info');
+				$(this).closest('td').removeClass('bg-primary');
 
-				case 39: //right arrow key
-					// alert('right');
-				break;
+				switch(e.which){
+					case 37: //left arrow key
+					// console.log("left arrow");
+						var curr_index = $(this).closest('tr').find('input').index($(this));
+						var curr_row = $(this).closest('tr');
+						var prev_col = $(this).closest('td').prev();
+						if(prev_col.length === 0) return;
+						$(curr_row).find('input').eq(curr_index-1).focus();
+						e.preventDefault();
+					break;
 
-				case 40: //down arrow key
-					var col = $(this).closest('tr').find('input').index($(this));
-					var next_row = $(this).closest('tr').next();
-					if(next_row.length ===0) return;
-					$(next_row).find('input').eq(col).focus();
-				break;
-			}
+					case 38: //up arrow key
+						// console.log("up arrow");
+						var col = $(this).closest('tr').find('input').index($(this));
+						var prev_row = $(this).closest('tr').prev();
+						if(prev_row.length ===0) return;
+						$(prev_row).find('input').eq(col).focus();
+					break;
+
+					case 39: //right arrow key
+						// console.log("right arrow");
+						var col = $(this).closest('tr').find('input').index($(this));
+						var curr_row = $(this).closest('tr');
+						var next_col = $(this).closest('td').next();
+						if(next_col.length === 0) return;
+						$(curr_row).find('input').eq(col+1).focus();
+						e.preventDefault();
+					break;
+
+					case 40: //down arrow key
+						// console.log("down arrow");
+						var col = $(this).closest('tr').find('input').index($(this));
+						var next_row = $(this).closest('tr').next();
+						if(next_row.length ===0) return;
+						$(next_row).find('input').eq(col).focus();
+					break;
+				}
+			});
 		});
+
+		$(self.element).find('input').livequery(function(){
+			$(this).change(function(event) {
+				/* Act on the event */
+				self.options.content_changed = true;
+				$(self.element).find('.autosave-box').html('contnet changed ...');
+			});
+
+			$(this).focus(function(event) {
+				// $(this).closest('.sec-attendance').find('tr').removeClass('bg-info');
+				// $('.labour_units_work').removeClass('bg-primary');
+				$(this).closest('tr').addClass('bg-info');
+				$(this).closest('td').addClass('bg-primary');
+				$(this).select();
+				// $(this).css('border','2px solid red');
+			});
+		});
+		//calling auto save after 30 sec interval
+		setInterval(function () { self.autoSave(); }, (30000));
+
+		//side navbar samll
+		$('#theme-wrapper > #page-wrapper').addClass('nav-small'); 
+	},
+
+	autoSave: function(){
+		var self = this;
+		if(self.options.content_changed){
+			$(self.element).find('.autosave-box').html('<div class="text-primary">auto saving your content ...</div>');
+			// $('.secser-savebutton').trigger('click');
+			self.save(true);
+			self.options.content_changed = false;
+		}else{
+			$(self.element).find('.autosave-box').html('');	
+		}
 	},
 
 	loadCSS: function(){
