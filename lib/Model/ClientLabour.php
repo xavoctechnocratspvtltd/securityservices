@@ -24,6 +24,6 @@ class Model_ClientLabour extends \xavoc\securityservices\Model_Labour{
 			return $q->expr('IFNULL([0],0)',[$model->sum('units_work')]);
 		})->type('Number');
 
-		$this->setOrder('name','asc');
+		// $this->setOrder('name','asc');
 	}
 }
