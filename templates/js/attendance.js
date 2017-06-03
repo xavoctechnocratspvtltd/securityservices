@@ -248,7 +248,8 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		for (var i =1; i <= self.options.month_days; i++) {
 			units_work = month_attendance[i];
 			if(units_work == undefined)
-				units_work = 0;
+				units_work = "0";
+			units_work = units_work.replace(/\.00$/,'');
 			tr_html += '<td data-date="'+i+'" class="labour_units_work" ><input class="secser-attendance-hour" type="text" value="'+units_work+'"/></td>';
 			row_total_hours += parseFloat(units_work);
 		}
