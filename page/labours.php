@@ -16,7 +16,7 @@ class page_labours extends \xepan\base\Page {
 				['name','mobile_no','bank_name','bank_account_no','bank_ifsc_code','bank_branch','labour_shift_hours','is_active','default_client','default_client_service','default_client_department']
 			);
 
-		$c->grid->addQuickSearch(['name','dob','mobile_no','email_id','bank_account_no']);
+		$c->grid->addQuickSearch(['name']);
 		$c->grid->addPaginator($ipp=50);
 		$c->grid->removeColumn('status');
 
