@@ -237,10 +237,10 @@ class page_manageattendance extends \xepan\base\Page {
 	function getAllRemainingLabours($month_year_model){
 
 		// client default labours
-		$default_labours = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id']]);
-		$default_labours = $default_labours->_dsql()->del('fields')->field('id')->getAll();
-		$default_labours = iterator_to_array(new \RecursiveIteratorIterator(new \RecursiveArrayIterator($default_labours)),false);
-		
+		// $default_labours = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id']]);
+		// $default_labours = $default_labours->_dsql()->del('fields')->field('id')->getAll();
+		// $default_labours = iterator_to_array(new \RecursiveIteratorIterator(new \RecursiveArrayIterator($default_labours)),false);
+		$default_labours = [];
 		$additional_labours = $month_year_model->additionalLabour();
 		$additional_labours = $additional_labours->_dsql()->del('fields')->field('id')->getAll();
 		$additional_labours = iterator_to_array(new \RecursiveIteratorIterator(new \RecursiveArrayIterator($additional_labours)),false);
