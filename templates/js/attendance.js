@@ -174,6 +174,8 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		for (var i =1; i <= self.options.month_days; i++) {
 			thead_html += '<th>'+i+'</th>';
 		}
+		thead_html += '<th>Total Hours</th>';
+
 		$(thead_html).appendTo(self.thead_tr);
 
 		if(default_labours.length == undefined || default_labours.length == 0){
@@ -221,23 +223,38 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 			self.addRow(labour_data);
 		});
 
+		// add col sum row
+		td_total_html = '<tr class="day-total-working-hours">';
+		td_total_html += "<th>Total Hours</th>";
+		for(var i=1; i<=self.options.month_days; i++){
+			td_total_html += '<td style="text-align:right;" data-date-sum="'+i+'" class="labour_day_total_units_work" ><div class="secser-total-day-hour">0</div></td>';
+		}
+		td_total_html += '<td style="text-align:right;" class="td-tr-sum" ></td>';
+		td_total_html += '</tr>';
+		$(td_total_html).appendTo(self.tbody);
+		self.updateTotalDayHours();
+		self.updateTotalSum();
 	},
 
 	addRow: function(labour_data){
 		var self = this;
 		tr_html = '<tr data-labour_id="'+labour_data.id+'">';
 		tr_html += "<th>"+labour_data.name+"</th>";
-
+		
 		month_attendance = labour_data.month_attendance;
 
 		i = 1
+		row_total_hours = 0;
 		for (var i =1; i <= self.options.month_days; i++) {
 			units_work = month_attendance[i];
 			if(units_work == undefined)
 				units_work = 0;
 			tr_html += '<td data-date="'+i+'" class="labour_units_work" ><input class="secser-attendance-hour" type="text" value="'+units_work+'"/></td>';
+			row_total_hours += parseFloat(units_work);
 		}
 
+		// total hours row wise
+		tr_html += '<td class="labour_units_work_row_total" style="text-align:right;"><div class="secser-attendance-total-hour">'+row_total_hours+'</div></td>';
 		tr_html += "</tr>";
 		$(tr_html).appendTo(self.tbody);
 
@@ -297,7 +314,8 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 			$(this).change(function(event) {
 				/* Act on the event */
 				self.options.content_changed = true;
-				$(self.element).find('.autosave-box').html('contnet changed ...');
+				$(self.element).find('.autosave-box').html('content changed ...');
+				self.updateTotalAmount($(this));
 			});
 
 			$(this).focus(function(event) {
@@ -314,6 +332,62 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 
 		//side navbar samll
 		$('#theme-wrapper > #page-wrapper').addClass('nav-small'); 
+	},
+
+	updateTotalAmount: function(curr_input){
+		var self = this;
+		// tr total sum
+		$current_row = $(curr_input).closest('tr');
+		tr_total_sum = 0;
+		$current_row.find('input').each(function(index,current_col){
+			tr_total_sum += parseFloat($(current_col).val());
+		});	
+		$current_row.find('div.secser-attendance-total-hour').html(tr_total_sum);
+
+		// td total sum
+		self.updateTotalDayHours(curr_input);
+		self.updateTotalSum();
+	},
+
+	updateTotalSum: function(){
+		var self = this;
+		// check update total sum of sum
+		labour_total_sum = 0;
+		$(self.tbody).find('td.labour_units_work_row_total > .secser-attendance-total-hour').each(function(index,total_row){
+			labour_total_sum = parseFloat(labour_total_sum) + parseFloat($(total_row).html());
+		});
+		$('.td-tr-sum').html(labour_total_sum);
+	},
+
+	// column wise sum actually day wise total hours works
+	updateTotalDayHours:function(curr_input=null){
+		var self = this;
+		if($(curr_input).length > 0){
+			var current_date = $(curr_input).parent('td').attr('data-date');
+			td_total_sum = 0;
+			$current_row.parent('tbody').find('tr[data-labour_id]').each(function(index,row){
+				val = $(row).find('td[data-date='+current_date+']').find('input').val();
+				td_total_sum += parseFloat(val);
+			});
+			$(self.tbody).find('tr.day-total-working-hours').find('td[data-date-sum='+current_date+']').find('.secser-total-day-hour').html(td_total_sum);
+		}else{
+			sum_array = [];
+			$(self.tbody).find('tr[data-labour_id]').each(function(index,row){
+				$(row).find('td[data-date]').each(function(index,col){
+					date = $(col).attr('data-date');
+					val = $(col).find('input').val();
+					if(sum_array[date] == undefined){
+						sum_array[date] = parseFloat(val);
+					} else{
+						sum_array[date] = parseFloat(sum_array[date]) + parseFloat(val);
+					}
+				});
+			});
+
+			$.each(sum_array, function(date, total_hour) {
+				$(self.tbody).find('tr.day-total-working-hours').find('td[data-date-sum='+date+']').find('.secser-total-day-hour').html(total_hour);
+			});
+		}
 	},
 
 	autoSave: function(){
