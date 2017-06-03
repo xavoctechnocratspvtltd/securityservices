@@ -256,7 +256,13 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		// total hours row wise
 		tr_html += '<td class="labour_units_work_row_total" style="text-align:right;"><div class="secser-attendance-total-hour">'+row_total_hours+'</div></td>';
 		tr_html += "</tr>";
-		$(tr_html).appendTo(self.tbody);
+
+		if($(self.tbody).find('.day-total-working-hours').length > 0){
+			$(tr_html).insertBefore($(self.tbody).find('.day-total-working-hours'));
+			// $(tr_html).after('.day-total-working-hours').appendTo(self.tbody);
+		}else{
+			$(tr_html).appendTo(self.tbody);
+		}
 
 		self.options.used_labours[labour_data.id] = labour_data.id;
 	},
