@@ -61,9 +61,9 @@ class page_manageattendance extends \xepan\base\Page {
 
 		$labour_model = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id'],'department_id'=>$dept_id]);
 		$default_labours = $labour_model->getRows();
-		
+
 		// $total_days_in_month = date("t",strtotime($month_year_model['month_year']));
-		
+		$default_labours_ids = [];
 		//associating month attendance
 		foreach ($default_labours as $key => $d_l) {
 			$att_m = $this->add('xavoc\securityservices\Model_Attendance');
@@ -80,6 +80,7 @@ class page_manageattendance extends \xepan\base\Page {
 				$month_record[$day_record['day']] = $day_record['units_work'];
 			}
 			$default_labours[$key]['month_attendance'] = $month_record;
+			$default_labours_ids[$d_l['id']] = $d_l['id'];
 		}
 
 		$add_labours = $month_year_model->additionalLabour($dept_id)->getRows();
@@ -87,6 +88,7 @@ class page_manageattendance extends \xepan\base\Page {
 		$additional_labours = [];
 
 		foreach ($add_labours as $key => $a_l) {
+			if(isset($default_labours_ids[$a_l['labour_id']])) continue;
 
 			$labour = $this->add('xavoc\securityservices\Model_Labour');
 			$labour->addCondition('id',$a_l['labour_id']);
@@ -110,14 +112,16 @@ class page_manageattendance extends \xepan\base\Page {
 				$month_record[$day_record['day']] = $day_record['units_work'];
 			}
 
-			$additional_labours = $temp;
-			$additional_labours[0]['month_attendance'] = $month_record;
+			$temp[0]['month_attendance'] = $month_record;
+			$additional_labours[] = $temp[0];
 		}
 
 		// echo "<pre>";
 		// print_r($additional_labours);
 		// echo "</pre>";
 		// exit;
+		// echo count($default_labours)." + ".count($additional_labours);
+		// die();
 
 		$return['status'] = "success";
 		$return['data']['default_labours'] = $default_labours;
@@ -222,12 +226,15 @@ class page_manageattendance extends \xepan\base\Page {
 		$insert_sql = trim($insert_sql,',');
 		$insert_sql .= ";";
 		
+		// echo $insert_sql;
+		// die();
+
 		try{
 			$this->app->db->dsql()->expr($insert_sql)->execute();
 			$return['status'] = 'success';
 
 		}catch(Exception $e){
-
+			throw new \Exception($e->getMessage());
 		}
 
 		echo json_encode($return);
@@ -236,6 +243,7 @@ class page_manageattendance extends \xepan\base\Page {
 
 	function getAllRemainingLabours($month_year_model){
 
+		// commented for passing all labour
 		// client default labours
 		// $default_labours = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$month_year_model->id,'client_id'=>$month_year_model['client_id']]);
 		// $default_labours = $default_labours->_dsql()->del('fields')->field('id')->getAll();

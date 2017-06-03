@@ -104,14 +104,14 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		inserted_data.attendance = {};
 
 		$(self.element).find('tbody.sec-attendance tr').each(function(index,current_tr){
-			if($(current_tr).hasClass('additional-labour-form-tr')){
+			if($(current_tr).hasClass('additional-labour-form-tr') || $(current_tr).hasClass('day-total-working-hours') ){
 				return;
-			} ;
+			};
 
 			curr_labour_id = $(current_tr).attr('data-labour_id');
 			inserted_data.attendance[""+curr_labour_id] = {};
 
-			$(current_tr).find('td').each(function(index,current_td){
+			$(current_tr).find('td.labour_units_work').each(function(index,current_td){
 				curr_date = $(current_td).attr('data-date');
 				inserted_data['attendance'][""+curr_labour_id][""+curr_date] = ($(current_td).find('input').val())?$(current_td).find('input').val():0;
 			});
@@ -168,7 +168,6 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		default_labours = self.options.default_labours;
 		additional_labours = self.options.additional_labours;
 		remaining_labours = JSON.parse(self.options.remaining_all_labours);
-
 		// for header 
 		var thead_html = "<th>Labour Name</th>";
 		for (var i =1; i <= self.options.month_days; i++) {
