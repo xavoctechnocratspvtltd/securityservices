@@ -254,7 +254,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 			if(units_work == undefined)
 				units_work = "0";
 			units_work = units_work.replace(/\.00$/,'');
-			tr_html += '<td data-date="'+i+'" class="labour_units_work" ><input class="secser-attendance-hour" type="text" value="'+units_work+'"/></td>';
+			tr_html += '<td data-date="'+i+'" class="labour_units_work" ><p class="hover-day" style="background-color:black;color:white;text-align:center;font-weight:bold;display:none;">'+i+'</p><input class="secser-attendance-hour" type="text" value="'+units_work+'"/></td>';
 			row_total_hours += parseFloat(units_work);
 		}
 
@@ -280,6 +280,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 
 				$(this).closest('tr').removeClass('bg-info');
 				$(this).closest('td').removeClass('bg-primary');
+				$(this).siblings('.hover-day').hide();
 
 				switch(e.which){
 					case 37: //left arrow key
@@ -335,6 +336,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 				$(this).closest('tr').addClass('bg-info');
 				$(this).closest('td').addClass('bg-primary');
 				$(this).select();
+				$(this).siblings('.hover-day').show();
 				// $(this).css('border','2px solid red');
 			});
 		});
