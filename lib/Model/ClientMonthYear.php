@@ -64,6 +64,21 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 				'invoice_date|to_trim|required',
 				'month_year|to_trim|required'
 			]);
+
+		$this->addHook('beforeSave',$this);
+	}
+
+	function beforeSave(){
+		$old_cmy = $this->add('xavoc\securityservices\Model_ClientMonthYear');
+		$old_cmy->addCondition('client_id',$this['client_id']);
+		$old_cmy->addCondition('month_year',$this['month_year']);
+		
+		if($this->loaded())
+			$old_cmy->addCondition('id','<>',$this->id);
+		$old_cmy->tryLoadAny();
+		if($old_cmy->loaded()){
+			throw $this->Exception("client month record is already added",'ValidityCheck')->setField('name');
+		}
 	}
 
 	function manage_attendance(){
