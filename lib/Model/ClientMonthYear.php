@@ -251,12 +251,20 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 					}
 					fclose($fp);
 
+	
 					$file_name = $this['invoice_no']."_".$this['client']."_".$this['month']."_".$this['year'].".csv";
+					header("Pragma: public");
+					header("Expires: 0");
+					header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+					header("Cache-Control: private",false);
+					header("Content-Type: application/octet-stream");
+					header("Content-Disposition: attachment; filename=\"$file_name\";" );
+					header("Content-Transfer-Encoding: binary"); 
 			    	// header("Content-type: text/csv");
-			    	header("Content-type: text/comma-separated-values, text/csv, application/csv, application/excel, application/vnd.ms-excel, application/vnd.msexcel");
-			        header('Content-disposition: attachment; filename="'+$file_name+'"');
-			        // header("Content-Length: " . strlen($output));
-			        header("Content-Transfer-Encoding: binary");
+			    	// header("Content-type: text/comma-separated-values, text/csv, application/csv, application/excel, application/vnd.ms-excel, application/vnd.msexcel");
+			     //    header('Content-disposition: attachment; filename="'+$file_name+'"');
+			     //    // header("Content-Length: " . strlen($output));
+			     //    header("Content-Transfer-Encoding: binary");
 			        // print $output;
 			        exit;
 				}
