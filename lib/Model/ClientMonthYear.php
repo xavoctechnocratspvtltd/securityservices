@@ -223,10 +223,10 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 						$csv_rows['total']['total_hours'] += $total_hours;
 
 						if($is_overtime_record){
-							$s_no ++;
-						}else{
 							$csv_rows[$key]['s_no'] = "";
 							$csv_rows[$key]['name'] = "overtime ".$month_record['client_department'];
+						}else{
+							$s_no ++;
 						}
 					}
 
