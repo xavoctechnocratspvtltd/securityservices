@@ -32,7 +32,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		self.widget_row_col1 = $('<div class="col-md-6 col-sm-6">').appendTo(self.widget_row);
 		self.widget_row_col2 = $('<div class="col-md-6 col-sm-6">').appendTo(self.widget_row);
 
-		self.table = table = $('<table class="sec-employee-attendance data" border="1"></table>').appendTo(self.wrapper);
+		self.table = table = $('<table class="sec-employee-attendance data" border="1" style="width:100%;"></table>').appendTo(self.wrapper);
 		self.thead = thead = $('<thead class="sec-header">').appendTo(table);
 		self.thead_tr = thead_tr = $('<tr>').appendTo(thead);
 		self.tbody = tbody = $('<tbody class="sec-attendance">').appendTo(table);
