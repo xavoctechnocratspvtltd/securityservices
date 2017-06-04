@@ -254,7 +254,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 			if(units_work == undefined)
 				units_work = "0";
 			units_work = units_work.replace(/\.00$/,'');
-			tr_html += '<td data-date="'+i+'" class="labour_units_work" ><p class="hover-day" style="background-color:black;color:white;text-align:center;font-weight:bold;display:none;">'+i+'</p><input class="secser-attendance-hour" type="text" value="'+units_work+'"/></td>';
+			tr_html += '<td style="height:65px;" data-date="'+i+'" class="labour_units_work" ><p class="hover-day" style="background-color:black;color:white;text-align:center;font-weight:bold;display:none;">'+i+'</p><input class="secser-attendance-hour" type="text" value="'+units_work+'"/></td>';
 			row_total_hours += parseFloat(units_work);
 		}
 
