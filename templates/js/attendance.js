@@ -190,7 +190,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		var add_tr = $('<tr class="additional-labour-form-tr"></tr>').appendTo(self.tbody);
 		var add_form =  $('<td colspan="'+(self.options.month_days+1)+'">add additional labour</td>').appendTo(add_tr);
 		var group = $('<div class="input-group">').appendTo(add_form);
-		var labour_field = $('<select class="form-control"></select>').appendTo(group);
+		var labour_field = $('<select class="form-control additional-labour-selector"></select>').appendTo(group);
 		var add_labour_btn = $('<span class="input-group-btn"><button class="btn btn-primary" type="button">Add</button></span></div>').appendTo(group);
 		
 		var additional_options = '<option value="0">Please Select Additional Labour</option>';
@@ -199,6 +199,9 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 			additional_options += '<option value="'+labour.id+'">'+labour.name+'</option>';
 		});
 		$(additional_options).appendTo(labour_field);
+		$('.additional-labour-selector').select2({
+			data:remaining_labours
+		});
 
 		$(add_labour_btn).click(function(){
 			var selected_labour_id = $(labour_field).val();
@@ -233,6 +236,8 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		$(td_total_html).appendTo(self.tbody);
 		self.updateTotalDayHours();
 		self.updateTotalSum();
+
+
 	},
 
 	addRow: function(labour_data){

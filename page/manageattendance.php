@@ -25,6 +25,8 @@ class page_manageattendance extends \xepan\base\Page {
 		$client_departments = $this->add('xavoc\securityservices\Model_ClientDepartment')->addCondition('client_id',$month_year_model['client_id']);
 		$this->title = $month_year_model['client']." ".$month_year_model['name']." (".$month_year_model['month_year'].") Attendance";
 		
+		$this->js(true)->_load('select2.min');
+		$this->app->jui->addStaticStylesheet('libs/select2');
 		$this->js(true)->_load('jquery.livequery');
 		$this->js(true)->_load('attendance')
 						->xavoc_secserv_attendance(
