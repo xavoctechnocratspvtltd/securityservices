@@ -11,7 +11,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 	public $status=['All'];
 
-	public $actions=['All'=>['view','edit','delete','manage_attendance','generate_approval_sheet','approved_service_data','generate_invoice','print_invoice','print_invoice_attachment','labour_payment','delete_Attandance']];
+	public $actions=['All'=>['view','edit','delete','manage_attendance','generate_approval_sheet','approved_service_data','generate_invoice','print_invoice','print_invoice_attachment','labour_payment','delete_Attandance','manage_deductions']];
 
 	function init(){
 		parent::init();
@@ -421,5 +421,12 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			$attendance->deleteAll();
 			$this->app->page_action_result = $form->js(null,$form->js()->univ()->successMessage($remove_count." ".'Remove Attandance SuccessFully'))->reload();		
 		}
+	}
+
+	function page_manage_deductions($page){
+		$deduction_m = $this->add('xavoc\securityservices\Model_Deduction')
+						->addCondition('client_month_year_id',$this->id);
+		$c = $page->add('xepan\hr\CRUD');
+		$c->setModel($deduction_m);
 	}
 }
