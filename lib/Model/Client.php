@@ -44,6 +44,8 @@ class Model_Client extends \xepan\base\Model_Table{
 		$c = $page->add('xepan\base\CRUD');
 		$c->setModel($m);
 		$c->grid->removeColumn('created_by');
+		$c->grid->addQuickSearch(['name']);
+		$c->grid->addPaginator($ipp=25);
 	}
 
 	function page_departments($page){
@@ -57,6 +59,8 @@ class Model_Client extends \xepan\base\Model_Table{
 			$form = $c->form;
 			$form->getElement('default_client_service_id')->getModel()->addCondition('client_id',$this->id);
 		}
+		$c->grid->addQuickSearch(['name']);
+		$c->grid->addPaginator($ipp=25);
 	}
 
 	function deleteClientServiceAndDepartment($m){
