@@ -11,7 +11,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 	public $status=['All'];
 
-	public $actions=['All'=>['view','edit','delete','manage_attendance','generate_approval_sheet','approved_service_data','generate_invoice','print_invoice','print_invoice_attachment','labour_payment']];
+	public $actions=['All'=>['view','edit','delete','manage_attendance','generate_approval_sheet','approved_service_data','generate_invoice','print_invoice','print_invoice_attachment','labour_payment','delete_Attandance']];
 
 	function init(){
 		parent::init();
@@ -349,6 +349,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 	function page_labour_payment($page){
 		$page->add('View')->set('Labour Payment sheet');
 
+
 		$tabs = $page->add('Tabs');
 		$client_services = $this->add('xavoc\securityservices\Model_ClientService');
 		$client_services->addCondition('client_id',$this['client_id']);
@@ -360,11 +361,45 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			$labour_payment = $this->add('xavoc\securityservices\Model_LabourPaymant',['client_month_year_record_id'=>$this->id,'client_service_id'=>$cs['id']]);
 			$grid = $tab->add('xepan\hr\Grid');
 			$grid->setModel($labour_payment,['name','total_unit_work','payment_rate','payment_base','days_of_month','labour_shift_hours','net_payable']);
+			$grid->add('misc/Export');
 			
 			$grid->removeColumn('action');
 			$grid->removeColumn('attachment_icon');
 			$grid->removeColumn('days_of_month');
 		}
 
+	}
+
+	function page_delete_Attandance($page){
+		$dept_model = $page->add('xavoc\securityservices\Model_ClientDepartment');
+		$dept_model->addCondition('client_id',$this['client_id']);
+		
+		$service_model = $this->add('xavoc\securityservices\Model_ClientService');	
+		$service_model->addCondition('client_id',$this['client_id']);
+		
+
+		$form = $page->add('Form');
+		$services_field = $form->addField('Dropdown','services')->setEmptyText('Please Select');
+		$services_field->setModel($service_model);
+		
+		$dept_field = $form->addField('Dropdown','department')->setEmptyText('Please Select');
+		if($_GET['client_services_id']){
+			$dept_model->addCondition('default_client_service_id',$_GET['client_services_id']);
+		}
+		$dept_field->setModel($dept_model);
+		$services_field->js('change',$form->js()->atk4_form('reloadField','department',[$this->app->url(),'client_services_id'=>$services_field->js()->val()]));
+		$form->addSubmit('Delete Attandance');
+		if($form->isSubmitted()){
+			if(!$form['department'] AND !$form['services']){
+				$form->displayError('services','Please Select at List on Options');
+			}
+			$attendance = $page->add('xavoc\securityservices\Model_Attendance');		
+			$attendance->addCondition('client_service_id',$form['services']);
+			$attendance->addCondition('client_department_id',$form['department']);
+			$remove_count = $attendance->count()->getOne();
+			// throw new \Exception($attendance->count()->getOne(), 1);
+			$attendance->deleteAll();
+			$this->app->page_action_result = $form->js(null,$form->js()->univ()->successMessage($remove_count." ".'Remove Attandance SuccessFully'))->reload();		
+		}
 	}
 }
