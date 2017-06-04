@@ -12,9 +12,9 @@ class Model_ClientService extends \xepan\base\Model_Table{
 		parent::init();
 
 		$this->hasOne('xavoc\securityservices\Client','client_id');
-		$this->hasOne('xavoc\securityservices\BillingService','billing_service_id');
+		$this->hasOne('xavoc\securityservices\BillingService','billing_service_id')->caption('For Invoicing');
 
-		$this->addField('name');
+		$this->addField('name')->caption('Our Internal Service name (Sub service for internal only)');
 		$this->addField('invoice_base')->enum(['Hour','Shift','Month']);
 		$this->addField('client_shift_hours')->type('number');
 		$this->addField('invoice_rate')->hint('payment to charge in invoice per invoice_base');
