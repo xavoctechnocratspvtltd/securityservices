@@ -393,9 +393,14 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			if(!$form['department'] AND !$form['services']){
 				$form->displayError('services','Please Select at List on Options');
 			}
-			$attendance = $page->add('xavoc\securityservices\Model_Attendance');		
-			$attendance->addCondition('client_service_id',$form['services']);
-			$attendance->addCondition('client_department_id',$form['department']);
+			$attendance = $page->add('xavoc\securityservices\Model_Attendance');
+			$attendance->addCondition('client_month_year_id',$this['id']);
+
+			if($form['services'])
+				$attendance->addCondition('client_service_id',$form['services']);
+			if($form['department'])
+				$attendance->addCondition('client_department_id',$form['department']);
+			
 			$remove_count = $attendance->count()->getOne();
 			// throw new \Exception($attendance->count()->getOne(), 1);
 			$attendance->deleteAll();
