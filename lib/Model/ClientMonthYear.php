@@ -245,9 +245,9 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 					$output = implode(",", $header);
 					$fp = fopen("php://output", "w");
-					fputcsv ($fp, $header, "\t");
+					fputcsv ($fp, $header, ",");
 					foreach($csv_rows as $key=>$row){
-						fputcsv($fp, $row, "\t");
+						fputcsv($fp, $row, ",");
 					}
 					fclose($fp);
 
