@@ -33,9 +33,9 @@ class Model_ClientService extends \xepan\base\Model_Table{
 	}
 
 	function deleteClientDepartment($m){
-		$client_labour = $this->ref('xavoc\securityservices\Labour')->count()->getOne();
+		//$client_labour = $this->ref('xavoc\securityservices\Labour')->count()->getOne();
 		$client_department = $this->ref('xavoc\securityservices\ClientDepartment')->count()->getOne();
-		if($client_department OR $client_labour){
+		if($client_department /*OR $client_labour*/){
 			throw new \Exception("Client Services Can not delete, Please Delete the Client Department & Labour first");
 		}
 	}	
