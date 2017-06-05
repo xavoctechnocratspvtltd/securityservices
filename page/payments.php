@@ -93,7 +93,7 @@ class page_payments extends \xepan\base\Page {
 							if($monthly_payment['is_pf_deduction']){
 								// 12 % of gross amount
 								$pf_amount = (12 /100) * $gross_amount;
-								$gross_amount = $gross_amount - $pf_amount;
+								// $gross_amount = $gross_amount - $pf_amount;
 							}
 							$payment['pf_amount'] = $pf_amount;
 							$payment['gross_amount'] = $gross_amount;
