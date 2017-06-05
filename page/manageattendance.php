@@ -220,6 +220,11 @@ class page_manageattendance extends \xepan\base\Page {
 					$shift_work = $labour_shift_hours;
 				}
 
+				if($client_department_model['overtime_in_multiple_of'] > 0 && $overtime_work > 0){
+					$mode = $overtime_work % $client_department_model['overtime_in_multiple_of'];
+					$overtime_work = $overtime_work - $mode;
+				}
+
 				$date = $year.'-'.$month.'-'.$day;
 				$attendance_date = date("Y-m-d H:i:s", strtotime($date));
 				$insert_sql .= '("'.$labour_id.'", "'.$client_month_year_id.'", "'.$client_department_model->id.'", "'.$client_department_model['default_client_service_id'].'", "'.$units_work.'", "'.$attendance_date.'", "'.$overtime_work.'", "'.$shift_work.'"),';
