@@ -15,6 +15,8 @@ class Model_ClientDepartment extends \xepan\base\Model_Table{
 		$this->hasOne('xavoc\securityservices\ClientService','default_client_service_id');
 
 		$this->addField('name');
+		$this->addField('overtime_in_multiple_of');
+		
 		$this->addExpression('client_shift_hours')->set(function($m,$q){
 			return $q->expr('IFNULL([0],0)',[$m->refSQL('default_client_service_id')->fieldQuery('client_shift_hours')]);
 		});
