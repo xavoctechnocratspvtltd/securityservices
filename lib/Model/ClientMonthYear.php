@@ -164,9 +164,10 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 				$c->grid->removeColumn('attachment_icon');
 				$c->grid->removeColumn('name');
 				$export = $c->grid->addButton('Export CSV');
-				$export->js('click')->univ()->newWindow($c->app->url(null,['download_csv_file'=>true]));
+				$key = "export_csv_file_".$bs->id;
 
-				if($_GET['download_csv_file']){
+				$export->js('click')->univ()->newWindow($c->app->url(null,[$key=>true]));
+				if($_GET[$key]){
 					$rows = $model->getRows();
 					
 					$days_in_month = date('t',strtotime($this['month_year']));
@@ -252,7 +253,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 					fclose($fp);
 
 	
-					$file_name = $this['invoice_no']."_".$this['client']."_".$this['month']."_".$this['year'].".csv";
+					$file_name = $this['invoice_no']."_".$this['client']."_".$this['month']."_".$this['year']."_".str_replace(" ", "", $bs['name']).".csv";
 					header("Pragma: public");
 					header("Expires: 0");
 					header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
