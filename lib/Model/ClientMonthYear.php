@@ -166,8 +166,9 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 				$export = $c->grid->addButton('Export CSV');
 				$key = "export_csv_file_".$bs->id;
 
-				$export->js('click')->univ()->newWindow($c->app->url(null,[$key=>true]));
-				if($_GET[$key]){
+				$export->js('click')->univ()->newWindow($c->app->url(null,['service'=>$bs['name']]));
+				if($_GET['service']===$bs['name']){
+
 					$rows = $model->getRows();
 					
 					$days_in_month = date('t',strtotime($this['month_year']));
@@ -244,15 +245,6 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 					unset($csv_rows['total']);
 					$csv_rows['total'] = $temp;
 
-					$output = implode(",", $header);
-					$fp = fopen("php://output", "w");
-					fputcsv ($fp, $header, ",");
-					foreach($csv_rows as $key=>$row){
-						fputcsv($fp, $row, ",");
-					}
-					fclose($fp);
-
-	
 					$file_name = $this['invoice_no']."_".$this['client']."_".$this['month']."_".$this['year']."_".str_replace(" ", "", $bs['name']).".csv";
 					header("Pragma: public");
 					header("Expires: 0");
@@ -261,6 +253,15 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 					header("Content-Type: application/octet-stream");
 					header("Content-Disposition: attachment; filename=\"$file_name\";" );
 					header("Content-Transfer-Encoding: binary"); 
+
+					$output = implode(",", $header);
+					$fp = fopen("php://output", "w");
+					fputcsv ($fp, $header, ",");
+					foreach($csv_rows as $key=>$row){
+						fputcsv($fp, $row, ",");
+					}
+					fclose($fp);
+	
 			    	// header("Content-type: text/csv");
 			    	// header("Content-type: text/comma-separated-values, text/csv, application/csv, application/excel, application/vnd.ms-excel, application/vnd.msexcel");
 			     //    header('Content-disposition: attachment; filename="'+$file_name+'"');
@@ -274,6 +275,13 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 		// $this->app->redirect($this->app->url('xavoc_secserv_generateapprovalsheet',['client_monthyear_record_id'=>$this->id]));
 		
+	}
+
+	function page_generate_approval_sheet_csv(){
+		$model = $this->add('xavoc\securityservices\Model_ApprovalSheet');
+		$model->addExpression('billing_service_id')->set($model->refSQL('client_service_id')->fieldQuery('billing_service_id'));
+		$model->addCondition('client_month_year_id',$this->id);
+		$model->addCondition('billing_service_id',$bs->id);
 	}
 
 	function page_approved_service_data($page){
