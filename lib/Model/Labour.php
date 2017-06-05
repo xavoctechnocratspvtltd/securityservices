@@ -29,6 +29,7 @@ class Model_Labour extends \xepan\base\Model_Table{
 		$this->addField('bank_ifsc_code');
 		$this->addField('bank_branch');
 		$this->addField('is_active')->type('boolean')->defaultValue(true);
+		$this->addField('is_pf_deduction')->type('boolean')->defaultValue(true);
 		
 		$this->add('xavoc\securityservices\Controller_ACLFields');
 		$this->hasMany('xavoc\securityservices\Attendance','labour_id',null,'Attendance');
