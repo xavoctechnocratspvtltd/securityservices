@@ -12,13 +12,23 @@ class page_payments extends \xepan\base\Page {
 
 		$this->app->stickyGET('month_year');
 
-		$form = $this->add('Form');
+		$form = $this->add('Form')->addClass('row');
 		$m_y_picker = $form->addField('DatePicker','month_year')->addClass('col-md-2');
+		$client_field = $form->addField('Dropdown','client')->setEmptyText('Please Select')->addClass('col-md-2');
+		$client_field->setModel('xavoc\securityservices\Client');
+		$client_serv_field = $form->addField('Dropdown','client_services')->setEmptyText('Please Select')->addClass('col-md-2');
 		$m_y_picker->options = [
 					'format'=> "yyyy-mm",
     				'startView'=> "months", 
     				'minViewMode'=> "months"
     			];
+    	$client_id = $this->app->stickyGET('client_id');		
+    	$client_service_id = $this->app->stickyGET('client_service_id');		
+    	$serv_m = $this->add('xavoc\securityservices\Model_ClientService');
+    	if($client_id)
+    		$serv_m->addCondition('client_id',$client_id);
+    	$client_serv_field->setModel($serv_m);
+    	$client_field->js('change',$form->js()->atk4_form('reloadField','client_services',[$this->app->url(),'client_id'=>$client_field->js()->val()]));		
 
 		$generate_btn = $form->addSubmit('Generate Payment')->addClass('col-md-2 btn btn-success');
 		$delete_btn = $form->addSubmit('Delete Payment')->addClass('col-md-2 btn btn-warning');
@@ -29,6 +39,14 @@ class page_payments extends \xepan\base\Page {
 
 		if($_GET['month_year']) $month_year = $_GET['month_year'];
 		$salary_model->addCondition('date',$month_year);
+		
+		if($client_id){
+			$salary_model->addCondition('client_id',$client_id);
+		}	
+		if($client_service_id){
+			$salary_model->addCondition('client_service_id',$client_service_id);
+		}
+		
 		$crud->setModel($salary_model);
 
 		$crud->grid->addQuickSearch(['labour']);
@@ -40,6 +58,10 @@ class page_payments extends \xepan\base\Page {
 			if($form->isClicked($delete_btn)){
 				$payment_model = $this->add('xavoc\securityservices\Model_Payment');
 				$payment_model->addCondition('date',$form['month_year']);
+				if($form['client'])
+					$payment_model->addCondition('client_id',$form['client']);
+				if($form['client_services'])
+					$payment_model->addCondition('client_service_id',$form['client_service_id']);
 				$count = $payment_model->count()->getOne();
 				$payment_model->deleteAll();
 				$form->js(null,$crud->js()->reload(['month_year'=>$form['month_year']]))->univ()->errorMessage($count.' records deleted')->execute();
@@ -49,8 +71,12 @@ class page_payments extends \xepan\base\Page {
 			if($form->isClicked($generate_btn)){
 				$payment_model = $this->add('xavoc\securityservices\Model_Payment');
 				$payment_model->addCondition('date',$form['month_year']);
+				if($form['client'])
+					$payment_model->addCondition('client_id',$form['client']);
+				if($form['client_services'])
+					$payment_model->addCondition('client_service_id',$form['client_services']);
 				if($payment_model->count()->getOne()){
-					$form->js(null,$crud->js()->reload(['month_year'=>$form['month_year']]))->univ()->errorMessage($form['month_year']." payment is generated previously, if you want again then first delete payment and Generate Payment Again")->execute();
+					$form->js(null,$crud->js()->reload(['month_year'=>$form['month_year'],'client_id'=>$form['client'],'client_service_id'=>$form['client_services']]))->univ()->errorMessage($form['month_year']." payment is generated previously, if you want again then first delete payment and Generate Payment Again")->execute();
 				}
 
 				$cmy_model = $this->add('xavoc\securityservices\Model_ClientMonthYear');
@@ -104,7 +130,7 @@ class page_payments extends \xepan\base\Page {
 						}
 					}
 				}
-				$form->js(null,$crud->js()->reload(['month_year'=>$form['month_year']]))->univ()->successMessage('Payment Generated')->execute();
+				$form->js(null,$crud->js()->reload(['month_year'=>$form['month_year'],'client_id'=>$form['client'],'client_service_id'=>$form['client_services']]))->univ()->successMessage('Payment Generated')->execute();
 			}
 		}
 

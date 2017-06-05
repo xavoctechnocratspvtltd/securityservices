@@ -18,6 +18,8 @@ class Model_Payment extends \xepan\base\Model_Table{
 			return $q->expr('IFNULL([0],0)',[$m->refSql('client_month_year_id')->fieldQuery('month_year')]);
 		});
 
+		$this->addExpression('client_id')->set($this->refSQL('client_month_year_id')->fieldQuery('client_id'));
+
 		$this->addField('total_unit_work');
 		$this->addField('payment_base');
 		$this->addField('payment_rate');
