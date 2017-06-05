@@ -10,6 +10,8 @@ class page_payments extends \xepan\base\Page {
 	function init(){
 		parent::init();
 
+		$this->app->stickyGET('month_year');
+
 		$form = $this->add('Form');
 		$m_y_picker = $form->addField('DatePicker','month_year')->addClass('col-md-2');
 		$m_y_picker->options = [
@@ -23,11 +25,13 @@ class page_payments extends \xepan\base\Page {
 		
 		$crud = $this->add('CRUD');
 		$salary_model = $this->add('xavoc\securityservices\Model_Payment');
-		$this->app->stickyGET('month_year');
 		$month_year = date('Y-m-01',strtotime($this->app->today));
+
 		if($_GET['month_year']) $month_year = $_GET['month_year'];
 		$salary_model->addCondition('date',$month_year);
 		$crud->setModel($salary_model);
+
+		$crud->grid->addQuickSearch(['labour']);
 
 		if($form->isSubmitted()){
 			if(!$form['month_year']) $form->error('month_year','required field');
@@ -46,7 +50,7 @@ class page_payments extends \xepan\base\Page {
 				$payment_model = $this->add('xavoc\securityservices\Model_Payment');
 				$payment_model->addCondition('date',$form['month_year']);
 				if($payment_model->count()->getOne()){
-					$form->js()->univ()->errorMessage($form['month_year']." payment is generated previously, if you want again then first delete payment and Generate Payment Again")->execute();
+					$form->js(null,$crud->js()->reload(['month_year'=>$form['month_year']]))->univ()->errorMessage($form['month_year']." payment is generated previously, if you want again then first delete payment and Generate Payment Again")->execute();
 				}
 
 				$cmy_model = $this->add('xavoc\securityservices\Model_ClientMonthYear');
