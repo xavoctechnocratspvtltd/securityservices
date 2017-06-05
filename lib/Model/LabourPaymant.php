@@ -59,7 +59,7 @@ class Model_LabourPaymant extends \xavoc\securityservices\Model_Labour{
 
 			if($m['payment_base'] == "Month"){
 				$per_day_salary = $m['payment_rate'] / $m['days_of_month'];
-				$net_payable = $per_day_salary * $total_unit_work;
+				$net_payable = $per_day_salary * ($total_unit_work/$m['labour_shift_hours']);
 			}elseif($m['payment_base'] == "Shift") {
 				$net_payable = $payment_rate * ($total_unit_work / $m['labour_shift_hours']);
 			}else{
