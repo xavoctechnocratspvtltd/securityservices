@@ -37,6 +37,7 @@ class Model_Payment extends \xepan\base\Model_Table{
 
 	function beforeSave(){
 		$this['gross_amount'] = round($this['gross_amount']);
+		$this['pf_amount'] = round($this['pf_amount']);
 
 		$net_payable = $this['gross_amount'];
 		if($this['pf_amount'] > 0)
