@@ -78,8 +78,8 @@ class page_payments extends \xepan\base\Page {
 							$gross_amount = 0;
 
 							if($monthly_payment['payment_base'] == "Month"){
-								$per_day_salary = $payment_rate / $days_of_month;
-								$gross_amount = $per_day_salary * $total_unit_work;
+								$per_day_salary = $payment_rate / $days_of_month ;
+								$gross_amount = $per_day_salary * ($total_unit_work / $monthly_payment['labour_shift_hours']);
 							}elseif ($monthly_payment['payment_base'] == "Shift") {
 								$gross_amount = $payment_rate * ($total_unit_work / $monthly_payment['labour_shift_hours']);
 							}else{
