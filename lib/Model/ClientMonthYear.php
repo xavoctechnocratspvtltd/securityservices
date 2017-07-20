@@ -180,10 +180,10 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 					$csv_rows['total']= ['s_no'=>'','name'=>'total'];
 					$header = ['s no','name'];
 					for ($i=1; $i <=$days_in_month; $i++) { 
-						$csv_rows['total_hours'][$i] = 0;	
-						$csv_rows['total_overtime'][$i] = 0;	
-						$csv_rows['total'][$i] = 0;	
-						$header[]= $i;	
+						$csv_rows['total_hours'][$i] = 0;
+						$csv_rows['total_overtime'][$i] = 0;
+						$csv_rows['total'][$i] = 0;
+						$header[]= $i;
 					}
 					$header[] = 'total_hours';
 					
@@ -212,10 +212,10 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 							// day total
 							if($is_overtime_record){
 								$csv_rows['total_overtime'][$day_number] += $unit_work;
-								$csv_rows['total_overtime']['total_hours'] += $csv_rows['total_overtime'][$day_number];
+								$csv_rows['total_overtime']['total_hours'] += $unit_work;
 							}else{
 								$csv_rows['total_hours'][$day_number] += $unit_work;
-								$csv_rows['total_hours']['total_hours'] += $csv_rows['total_hours'][$day_number];
+								$csv_rows['total_hours']['total_hours'] += $unit_work;
 							}
 
 							$csv_rows['total'][$day_number] += $unit_work;
