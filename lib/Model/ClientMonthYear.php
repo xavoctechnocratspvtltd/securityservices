@@ -45,15 +45,15 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		});
 
 		$this->addExpression('gross_amount')->set(function($m,$q){
-			return $q->expr('IFNULL([0],0)',[$m->refSQL('xavoc\securityservices\InvoiceDetail')->sum('amount')]);
+			return $q->expr('ROUND(IFNULL([0],0),2)',[$m->refSQL('xavoc\securityservices\InvoiceDetail')->sum('amount')]);
 		});
 
 		$this->addExpression('service_tax_amount')->set(function($m,$q){
-			return $q->expr('(IFNULL([service_tax],0) * IFNULL([gross_amount],0)/100)',['service_tax'=>$m->getElement('service_tax'),'gross_amount'=>$m->getElement('gross_amount')]);
+			return $q->expr('ROUND((IFNULL([service_tax],0) * IFNULL([gross_amount],0)/100),2)',['service_tax'=>$m->getElement('service_tax'),'gross_amount'=>$m->getElement('gross_amount')]);
 		})->type('money');
 
 		$this->addExpression('net_amount')->set(function($m,$q){
-			return $q->expr('([0] + IFNULL([1],0))',[$m->getElement('gross_amount'),$m->getElement('service_tax_amount')]);
+			return $q->expr('CAST(ROUND(([0] + IFNULL([1],0)),0) AS DECIMAL(10,2))',[$m->getElement('gross_amount'),$m->getElement('service_tax_amount')]);
 		})->type('money');
 
 		$this->addExpression('status')->set('"All"');
