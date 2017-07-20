@@ -53,7 +53,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		})->type('money');
 
 		$this->addExpression('net_amount')->set(function($m,$q){
-			return $q->expr('([0]- IFNULL([1],0))',[$m->getElement('gross_amount'),$m->getElement('service_tax_amount')]);
+			return $q->expr('([0] + IFNULL([1],0))',[$m->getElement('gross_amount'),$m->getElement('service_tax_amount')]);
 		})->type('money');
 
 		$this->addExpression('status')->set('"All"');
