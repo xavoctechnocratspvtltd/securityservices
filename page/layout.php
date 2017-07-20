@@ -29,7 +29,7 @@ class page_layout extends \xepan\base\Page {
 			$layout['detail'] = $form['detail'];
 			$layout->save();
 
-			$form->js()->univ()->reload()->successMessage('Saved')->execute();
+			$form->js()->univ()->redirect($this->app->url(null,['id'=>$layout->id]))->successMessage('Saved')->execute();
 		}
 
 	}
