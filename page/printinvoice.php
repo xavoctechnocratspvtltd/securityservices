@@ -44,7 +44,7 @@ class page_printinvoice extends \Page {
 		$master_array['net_amount_in_words'] = $document->amountInWords($month_year_model['net_amount']);
 
 		$view = $this->add('View',null,null,$master_layout);
-		$view->template->set($master_array);
+		$view->template->setHtml($master_array);
 		
 		$invoice = $this->add('xavoc\securityservices\Model_InvoiceDetail');
 		$invoice->addCondition('client_month_year_id',$c_month_year_id);
