@@ -11,33 +11,37 @@ class page_payments extends \xepan\base\Page {
 		parent::init();
 
 		$this->app->stickyGET('month_year');
+    	$client_id = $this->app->stickyGET('client_id');
+    	$client_service_id = $this->app->stickyGET('client_service_id');
 
 		$form = $this->add('Form')->addClass('row');
-		$m_y_picker = $form->addField('DatePicker','month_year')->addClass('col-md-2');
-		$client_field = $form->addField('Dropdown','client')->setEmptyText('Please Select')->addClass('col-md-2');
+
+		$m_y_picker = $form->addField('DatePicker','month_year');
+		$client_field = $form->addField('Dropdown','client')->setEmptyText('Please Select');
 		$client_field->setModel('xavoc\securityservices\Client');
-		$client_serv_field = $form->addField('Dropdown','client_services')->setEmptyText('Please Select')->addClass('col-md-2');
+		$client_serv_field = $form->addField('Dropdown','client_services')->setEmptyText('Please Select');
 		$m_y_picker->options = [
 					'format'=> "yyyy-mm",
     				'startView'=> "months", 
     				'minViewMode'=> "months"
     			];
-    	$client_id = $this->app->stickyGET('client_id');		
-    	$client_service_id = $this->app->stickyGET('client_service_id');		
+    			
     	$serv_m = $this->add('xavoc\securityservices\Model_ClientService');
     	if($client_id)
     		$serv_m->addCondition('client_id',$client_id);
     	$client_serv_field->setModel($serv_m);
-    	$client_field->js('change',$form->js()->atk4_form('reloadField','client_services',[$this->app->url(),'client_id'=>$client_field->js()->val()]));		
+    	$client_field->js('change',$form->js()->atk4_form('reloadField','client_services',[$this->app->url(),'client_id'=>$client_field->js()->val()]));
 
-		$generate_btn = $form->addSubmit('Generate Payment')->addClass('col-md-2 btn btn-success');
-		$delete_btn = $form->addSubmit('Delete Payment')->addClass('col-md-2 btn btn-warning');
+		$generate_btn = $form->addSubmit('Generate Payment')->addClass('btn btn-success');
+		$delete_btn = $form->addSubmit('Delete Payment')->addClass('btn btn-warning');
 		
-		$crud = $this->add('CRUD');
+		$crud = $this->add('CRUD',['allow_add'=>false,'allow_del'=>false]);
+
 		$salary_model = $this->add('xavoc\securityservices\Model_Payment');
 		$month_year = date('Y-m-01',strtotime($this->app->today));
 
 		if($_GET['month_year']) $month_year = $_GET['month_year'];
+
 		$salary_model->addCondition('date',$month_year);
 		
 		if($client_id){
@@ -46,12 +50,14 @@ class page_payments extends \xepan\base\Page {
 		if($client_service_id){
 			$salary_model->addCondition('client_service_id',$client_service_id);
 		}
+			
 		
 		$crud->setModel($salary_model);
 
 		$crud->grid->addQuickSearch(['labour']);
 
 		if($form->isSubmitted()){
+
 			if(!$form['month_year']) $form->error('month_year','required field');
 
 			// delete button
@@ -78,7 +84,7 @@ class page_payments extends \xepan\base\Page {
 				if($payment_model->count()->getOne()){
 					$form->js(null,$crud->js()->reload(['month_year'=>$form['month_year'],'client_id'=>$form['client'],'client_service_id'=>$form['client_services']]))->univ()->errorMessage($form['month_year']." payment is generated previously, if you want again then first delete payment and Generate Payment Again")->execute();
 				}
-
+				
 				$cmy_model = $this->add('xavoc\securityservices\Model_ClientMonthYear');
 				$cmy_model->addCondition('month_year',$form['month_year']);
 				
