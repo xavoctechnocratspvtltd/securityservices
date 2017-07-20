@@ -15,7 +15,13 @@ class Model_InvoiceDetail extends \xepan\base\Model_Table{
 		$this->hasOne('xavoc\securityservices\BillingService','billing_service_id');
 		$this->addField('units');
 		$this->addField('rate');
+		
 		$this->addField('amount');
-
+		$this->addHook('beforeSave',$this);
 	}
+
+	function beforeSave(){
+		$this['amount'] = $this['units'] * $this['rate'];
+	}
+
 }

@@ -292,17 +292,22 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 	}
 
 	function page_generate_invoice($page){
+		$this->app->stickyGET('service_id');
 
 		$tabs = $page->add('Tabs');
 		$invoice_tab = $tabs->addTab('Invoice Data');
 		$approved_tab = $tabs->addTab('Approved Units');
 
-		$form = $invoice_tab->add('Form')->addClass('main-box')->setStyle('padding','10px;');
+		$form = $invoice_tab->add('Form');
 		$form->add('View')->setElement('h3')->set('Invoice Information');
+		$col = $form->add('Columns')->addClass('row');
+		$col1 = $col->addColumn('4')->addClass('col-md-4 col-lg-4 col-sm-12 col-xs-12');
+		$col2 = $col->addColumn('4')->addClass('col-md-4 col-lg-4 col-sm-12 col-xs-12');
+		$col3 = $col->addColumn('4')->addClass('col-md-4 col-lg-4 col-sm-12 col-xs-12');
 
-		$form->addField('invoice_no')->validate('required')->set($this['invoice_no']);
-		$form->addField('DatePicker','invoice_date')->validate('required')->set($this['invoice_date']);
-		$form->addSubmit('Save');
+		$col1->addField('invoice_no')->validate('required')->set($this['invoice_no']);
+		$col2->addField('DatePicker','invoice_date')->validate('required')->set($this['invoice_date']);		
+		$col3->addSubmit('Save');
 
 		if($form->isSubmitted()){
 			$this['invoice_no'] = $form['invoice_no'];
@@ -319,10 +324,29 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			return $c->grid->js()->reload();
 		});
 
-		$m=$this->add('xavoc\securityservices\Model_InvoiceDetail');
+		$m = $this->add('xavoc\securityservices\Model_InvoiceDetail');
 		$m->addCondition('client_month_year_id', $this->id);
-		$c->setModel($m);
+		$c->setModel($m,['billing_service_id','units','rate'],['billing_service_id','units','rate','amount']);
+		if($c->isEditing()){
+			$form = $c->form;
+			$bs_id_field = $form->getElement('billing_service_id');
+			$rate_field = $form->getElement('rate');
+			$bs_id_field->js('change',$form->js()->atk4_form('reloadField','rate',[$this->app->url(),'service_id'=>$bs_id_field->js()->val()]));
+			
+			if($_GET['service_id']){
+				$cs = $this->add('xavoc\securityservices\Model_ClientService');
+				$cs->addCondition('client_id',$this['client_id']);
+				$cs->addCondition('billing_service_id',$_GET['service_id']);
 
+				$cs->tryLoadAny();
+				if($cs->loaded())
+					$rate_field->set($cs['invoice_rate']);
+				else
+					$rate_field->set(0);
+			}
+
+		}
+		// approved tabs
 		$g = $approved_tab->add('xepan\base\Grid');
 		$m=$this->add('xavoc\securityservices\Model_ClientMonthYearApprovedData');
 		$m->addCondition('client_month_year_id', $this->id);
