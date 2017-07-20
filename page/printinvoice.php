@@ -26,6 +26,7 @@ class page_printinvoice extends \Page {
 
 		//  from client model
 		$master_array['client_name'] = $client_model['name'];
+		$master_array['billing_name'] = $client_model['billing_name'];
 		$master_array['client_address'] = $client_model['address'];
 		$master_array['client_email'] = $client_model['email_id'];
 		$master_array['client_contact'] = $client_model['mobile_no'];
