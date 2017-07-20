@@ -22,7 +22,7 @@ class Model_Client extends \xepan\base\Model_Table{
 
 		$this->addField('name')->caption('organization name');
 		$this->addField('owner_name')->caption('Owner/ Manager name');
-		$this->addField('billing_name')->caption('Billing Name');
+		$this->addField('billing_name')->type('text')->display(['form'=>'xepan\base\RichText'])->caption('Billing Name');
 		$this->addField('address')->type('text');
 		$this->addField('tin_no');
 		$this->addField('mobile_no');
