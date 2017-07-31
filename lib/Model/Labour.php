@@ -34,6 +34,19 @@ class Model_Labour extends \xepan\base\Model_Table{
 		$this->add('xavoc\securityservices\Controller_ACLFields');
 		$this->hasMany('xavoc\securityservices\Attendance','labour_id',null,'Attendance');
 		
+		$this->addHook('beforeSave',$this);
+	}
+
+	function beforeSave(){
+		if($this['bank_account_no']){
+			$labour = $this->add('xavoc\securityservices\Model_Labour');
+			$labour->addCondition('bank_account_no',$this['bank_account_no']);
+			if($this->loaded())
+				$labour->addCondition('id','<>',$this->id);
+			$labour->tryLoadAny();
+			if($labour->loaded())
+				throw $this->Exception("Account number already added to other labour ".$labour['name'],'ValidityCheck')->setField('bank_account_no');
+		}
 	}
 
 	function importFromCSV($data){
