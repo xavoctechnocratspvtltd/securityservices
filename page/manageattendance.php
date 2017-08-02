@@ -96,7 +96,8 @@ class page_manageattendance extends \xepan\base\Page {
 			$labour->addCondition('id',$a_l['labour_id']);
 			$labour->tryLoadAny();
 			if(!$labour->loaded()){
-				throw new \Exception("labour not found or deleted");
+				continue;
+				throw new \Exception("labour not found or deleted ".$a_l['labour_id']);
 			};
 
 			$temp = $labour->getRows();
