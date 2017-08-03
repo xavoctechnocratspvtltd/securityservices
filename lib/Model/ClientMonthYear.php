@@ -490,7 +490,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$days_in_month = date('t',strtotime($this['month_year']));
 
 		for ($i=1; $i <= $days_in_month; $i++) {
-			$sheet_array[$i] = 0;
+			$sheet_array[$i] = 'L';
 		}
 		
 
@@ -498,44 +498,72 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			$billing_service_id = $approved_data['client_service_id'];
 			if(!isset($labour_array[$billing_service_id])) $labour_array[$billing_service_id] = [];
 
-			$atten_m = $this->add('xavoc\securityservices\Model_Attendance');
-			$atten_m->addExpression('billing_service_id')->set(function($m,$q){
-				return $m->refSql('client_service_id')->fieldQuery('billing_service_id');
-			});
+			// $atten_m = $this->add('xavoc\securityservices\Model_Attendance');
+			// $atten_m->addExpression('billing_service_id')->set(function($m,$q){
+			// 	return $m->refSql('client_service_id')->fieldQuery('billing_service_id');
+			// });
 
-			$atten_m->addCondition('client_month_year_id',$this->id);
-			$atten_m->addCondition('billing_service_id',$billing_service_id);
-
+			// $atten_m->addCondition('client_month_year_id',$this->id);
+			// $atten_m->addCondition('billing_service_id',$billing_service_id);
+			
 			$units_approved = $m['units_approved'];
 			$client_shift_hour = 1;
 			$duty_to_implement = $units_approved / $client_shift_hour;
 			$duty_implemented = 0;
 			$remaining_duty = 0;
 
+			$last_rand_no = 0;
 			$labour_used = [];
-			foreach($atten_m as $a) {
-				$labour_id = $a['labour_id'];
-				if(!isset($labour_array[$billing_service_id][$labour_id])) $labour_array[$billing_service_id][$labour_id] = $sheet_array;
 
-				// if unit works has then set 1
-				if($a['units_work'] > 0){
-					$date = date('j', strtotime($a['date']));
-					$labour_array[$billing_service_id][$labour_id][$date] = 1;
-					$labour_used[$labour_id] = $labour_id;
+			// foreach($atten_m as $a) {
 
-					$duty_implemented++;
-				}
-			}
+			// 	$labour_id = $a['labour_id'];
+			// 	if(!isset($labour_array[$billing_service_id][$labour_id])) $labour_array[$billing_service_id][$labour_id] = $sheet_array;
 
-			$remaining_duty = $duty_to_implement - $duty_implemented;
+			// 	$start_leave_day = rand(1,6);
 
-			if($remaining_duty == 0) continue;
-			if($remaining_duty < 0) throw new \Exception("remaining_duty is negative, something wrong");
+			// 	if($last_rand_no == $start_leave_day){
+			// 		$last_rand_no += 1;
+			// 		if($last_rand_no > 6)
+			// 			$start_leave_day = rand(1,5);
+			// 	}
 
+			// 	$last_rand_no = $start_leave_day;
+
+			// 	if($duty_implemented >= $duty_to_implement){
+			// 		break;
+			// 	} 
+
+			// 	$labour_used[$labour_id] = $labour_id;				
+				
+			// 	$week_count = 0;
+			// 	for ($i=1; $i <= $days_in_month; $i++) {
+			// 		if($duty_implemented >= $duty_to_implement){
+			// 			echo $i;
+			// 			continue;
+			// 		}
+
+			// 	// 	if($start_leave_day == $i OR ($start_leave_day + (6 * $week_count)) == $i){
+			// 	// 		$labour_array[$billing_service_id][$labour_id][$i] = 'L';
+			// 	// 		$week_count++;
+			// 	// 	}else{
+			// 	// 		$labour_array[$billing_service_id][$labour_id][$i] = 'P';
+			// 	// 		$duty_implemented++;
+			// 	// 	}
+			// 	}
+			// }
+
+			// echo "<pre>";
+			// print_r($labour_array);
+			// echo "</pre>";
+			// die();
+			// $remaining_duty = $duty_to_implement - $duty_implemented;
+
+			// if($remaining_duty <= 0) continue;
 
 			$extra_labour = $this->add('xavoc\securityservices\Model_Labour');
 			$extra_labour->addCondition('is_active',true);
-			$extra_labour->addCondition('id','<>',$labour_used);
+			// $extra_labour->addCondition('id','<>',$labour_used);
 			$extra_labour_count = $extra_labour->count()->getOne();
 
 			/*
@@ -545,7 +573,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			*/
 			$last_rand_no = 0;
 			foreach ($extra_labour as $labour) {
-				$start_leave_day = rand(1,6);
+				$start_leave_day = rand(1,5);
 
 				if($last_rand_no == $start_leave_day){
 					$last_rand_no += 1;
@@ -566,11 +594,11 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 				for ($i=1; $i <= $days_in_month; $i++) {
 					if($duty_implemented >= $duty_to_implement) continue;
 
-					if($start_leave_day == $i OR ($start_leave_day + (7 * $week_count)) == $i){
-						$labour_array[$billing_service_id][$labour_id][$i] = 0;
+					if($start_leave_day == $i OR ($start_leave_day + (6 * $week_count)) == $i){
+						$labour_array[$billing_service_id][$labour_id][$i] = "L";
 						$week_count++;
 					}else{
-						$labour_array[$billing_service_id][$labour_id][$i] = 1;
+						$labour_array[$billing_service_id][$labour_id][$i] = "P";
 						$duty_implemented++;
 					}
 				}
@@ -598,7 +626,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 					$total_present = 0;
 					foreach ($atten_array as $day => $value) {
 						$temp .= "'".$value."',";
-						if($value == 1) $total_present++;
+						if($value == "P") $total_present++;
 					}
 
 					$temp .= "'".$total_present."',";
@@ -613,7 +641,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$grid = $page->add('Grid');
 		$grid->setModel($pl_model);
 		$grid->add('misc/Export');
-		
+
 		// $export = $grid->addButton('Export CSV');
 		// $key = "export_csv_file_".$this->id;
 		// $export->js('click')->univ()->newWindow($grid->app->url(null,['record'=>$this->id]));

@@ -15,7 +15,7 @@ class Model_PL extends \xepan\base\Model_Table{
 		$this->hasOne('xavoc\securityservices\Labour','labour_id');
 		
 		for($i=1; $i <= 31; $i++){
-			$this->addField('d'.$i)->type('int')->defaultValue(0);
+			$this->addField('d'.$i)->defaultValue('L');
 		}
 
 		$this->addField('total_present')->type('int');
