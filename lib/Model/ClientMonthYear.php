@@ -11,7 +11,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 	public $status=['All'];
 
-	public $actions=['All'=>['view','edit','delete','manage_attendance','generate_approval_sheet','approved_service_data','generate_invoice','print_invoice','print_invoice_attachment','labour_payment','delete_Attandance','manage_deductions']];
+	public $actions=['All'=>['view','edit','delete','manage_attendance','generate_approval_sheet','approved_service_data','generate_invoice','print_invoice','print_invoice_attachment','labour_payment','delete_Attandance','generate_PL']];
 
 	function init(){
 		parent::init();
@@ -252,7 +252,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 					header("Cache-Control: private",false);
 					header("Content-Type: application/octet-stream");
 					header("Content-Disposition: attachment; filename=\"$file_name\";" );
-					header("Content-Transfer-Encoding: binary"); 
+					header("Content-Transfer-Encoding: binary");
 
 					$output = implode(",", $header);
 					$fp = fopen("php://output", "w");
@@ -471,4 +471,175 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$c = $page->add('xepan\hr\CRUD');
 		$c->setModel($deduction_m);
 	}
+
+	function page_generate_PL($page){
+
+		$view = $page->add('View')->addClass('main-box');
+		$view->add('Button')->set('Click to Remove All PL for Re-generate')->addClass('btn btn-primary')->on('click',function($js,$data){
+			$pl_model = $this->add('xavoc\securityservices\Model_PL');
+			$pl_model->addCondition('client_month_year_id',$this->id);
+			$pl_model->deleteAll();
+			return $js->univ()->successMessage('please re-run action to "Generate PL"')->closeDialog();
+		});
+
+		$m = $page->add('xavoc\securityservices\Model_ClientMonthYearApprovedData');
+		$m->addCondition('client_month_year_id', $this->id);
+
+		$labour_array = [];
+		$sheet_array = [];
+		$days_in_month = date('t',strtotime($this['month_year']));
+
+		for ($i=1; $i <= $days_in_month; $i++) {
+			$sheet_array[$i] = 0;
+		}
+		
+
+		foreach ($m as $approved_data) {
+			$billing_service_id = $approved_data['client_service_id'];
+			if(!isset($labour_array[$billing_service_id])) $labour_array[$billing_service_id] = [];
+
+			$atten_m = $this->add('xavoc\securityservices\Model_Attendance');
+			$atten_m->addExpression('billing_service_id')->set(function($m,$q){
+				return $m->refSql('client_service_id')->fieldQuery('billing_service_id');
+			});
+
+			$atten_m->addCondition('client_month_year_id',$this->id);
+			$atten_m->addCondition('billing_service_id',$billing_service_id);
+
+			$units_approved = $m['units_approved'];
+			$client_shift_hour = 1;
+			$duty_to_implement = $units_approved / $client_shift_hour;
+			$duty_implemented = 0;
+			$remaining_duty = 0;
+
+			$labour_used = [];
+			foreach($atten_m as $a) {
+				$labour_id = $a['labour_id'];
+				if(!isset($labour_array[$billing_service_id][$labour_id])) $labour_array[$billing_service_id][$labour_id] = $sheet_array;
+
+				// if unit works has then set 1
+				if($a['units_work'] > 0){
+					$date = date('j', strtotime($a['date']));
+					$labour_array[$billing_service_id][$labour_id][$date] = 1;
+					$labour_used[$labour_id] = $labour_id;
+
+					$duty_implemented++;
+				}
+			}
+
+			$remaining_duty = $duty_to_implement - $duty_implemented;
+
+			if($remaining_duty == 0) continue;
+			if($remaining_duty < 0) throw new \Exception("remaining_duty is negative, something wrong");
+
+
+			$extra_labour = $this->add('xavoc\securityservices\Model_Labour');
+			$extra_labour->addCondition('is_active',true);
+			$extra_labour->addCondition('id','<>',$labour_used);
+			$extra_labour_count = $extra_labour->count()->getOne();
+
+			/*
+			* remaining (1000-874 = 126)
+			  client_shift_hour = 
+			  minimum_labour_required = remaining / day_in_month;
+			*/
+			$last_rand_no = 0;
+			foreach ($extra_labour as $labour) {
+				$start_leave_day = rand(1,6);
+
+				if($last_rand_no == $start_leave_day){
+					$last_rand_no += 1;
+					if($last_rand_no > 6)
+						$start_leave_day = rand(1,5);
+				}
+
+				$last_rand_no = $start_leave_day;
+
+				$labour_id = $labour->id;
+				if($duty_implemented >= $duty_to_implement) break;
+
+				$labour_used[$labour_id] = $labour_id;
+
+				if(!isset($labour_array[$billing_service_id][$labour_id])) $labour_array[$billing_service_id][$labour_id] = $sheet_array;
+				
+				$week_count = 0;
+				for ($i=1; $i <= $days_in_month; $i++) {
+					if($duty_implemented >= $duty_to_implement) continue;
+
+					if($start_leave_day == $i OR ($start_leave_day + (7 * $week_count)) == $i){
+						$labour_array[$billing_service_id][$labour_id][$i] = 0;
+						$week_count++;
+					}else{
+						$labour_array[$billing_service_id][$labour_id][$i] = 1;
+						$duty_implemented++;
+					}
+				}
+			}
+		}
+
+		// $page->add('View')->set("Duty implemented=".$duty_implemented." duty to implement=".$duty_to_implement);
+		// $page->add('View')->set("total labour count.".count($labour_used));
+		// echo "<pre>";
+		// print_r($labour_array);
+		// echo "</pre>";
+
+		$pl_model = $this->add('xavoc\securityservices\Model_PL');
+		$pl_model->addCondition('client_month_year_id',$this->id);
+		$record_count = $pl_model->count()->getOne();
+
+		if(!$record_count){
+
+			$pl_query = "INSERT into secserv_pl (client_month_year_id,client_billing_service_id,labour_id,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11,d12,d13,d14,d15,d16,d17,d18,d19,d20,d21,d22,d23,d24,d25,d26,d27,d28,d29,d30,d31,total_present) VALUES ";
+			foreach($labour_array as $billing_id => $labour) {
+				foreach ($labour as $l_id => $atten_array){
+					$pl_query .= "('".$this->id."','".$billing_id."','".$l_id."',";
+
+					$temp = "";
+					$total_present = 0;
+					foreach ($atten_array as $day => $value) {
+						$temp .= "'".$value."',";
+						if($value == 1) $total_present++;
+					}
+
+					$temp .= "'".$total_present."',";
+					$pl_query .= trim($temp,',')."),";
+				}
+			}
+
+			$pl_query = trim($pl_query,",").";";
+			$this->app->db->dsql()->expr($pl_query)->execute();
+		}
+
+		$grid = $page->add('Grid');
+		$grid->setModel($pl_model);
+		$grid->add('misc/Export');
+		
+		// $export = $grid->addButton('Export CSV');
+		// $key = "export_csv_file_".$this->id;
+		// $export->js('click')->univ()->newWindow($grid->app->url(null,['record'=>$this->id]));
+		// if($_GET['record']===$this->id){
+		// 	$rows = $pl_model->getRows();
+		// 	$file_name = "PL_List_of "."_".str_replace(" ", "",$this['client'])."_".str_replace(" ", "",$this['month_year']).".csv";
+
+		// 	header("Pragma: public");
+		// 	header("Expires: 0");
+		// 	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+		// 	header("Cache-Control: private",false);
+		// 	header("Content-Type: application/octet-stream");
+		// 	header("Content-Disposition: attachment; filename=\"$file_name\";" );
+		// 	header("Content-Transfer-Encoding: binary");
+
+		// 	$header = [];
+		// 	$csv_rows = $rows;
+		// 	$output = implode(",", $header);
+		// 	$fp = fopen("php://output", "w");
+		// 	fputcsv ($fp, $header, ",");
+		// 	foreach($csv_rows as $key=>$row){
+		// 		fputcsv($fp, $row, ",");
+		// 	}
+		// 	fclose($fp);
+		// }
+
+	}
+
 }
