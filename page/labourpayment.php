@@ -56,7 +56,7 @@ class page_labourpayment extends \xepan\base\Page {
     	$export->js('click')->univ()->newWindow($grid->app->url(null,['generate_csv'=>true]));
 
 		if($_GET['generate_csv']){
-			$salary = "Salary ".date('F Y',strtotime($_GET['month_year']));
+			$salary = 'Salary '.date('F Y',strtotime($_GET['month_year']));
 			
 			$record = $p_m->getRows();
 			$csv_rows = [];
@@ -85,8 +85,13 @@ class page_labourpayment extends \xepan\base\Page {
 			// $output = implode(",", $header);
 			$fp = fopen("php://output", "w");
 			// fputcsv ($fp, $header, ",");
+
 			foreach($csv_rows as $key=>$row){
-				fputcsv($fp, $row, ",");
+				foreach ($row as $field => $value) {
+				 	echo $value . ",";
+				}
+				echo "\n";
+				// fputcsv($fp,$row, ",");
 			}
 			fclose($fp);
 			exit;
