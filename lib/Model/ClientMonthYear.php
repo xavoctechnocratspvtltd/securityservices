@@ -493,19 +493,14 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			$sheet_array[$i] = 'L';
 		}
 		
+		$tab = $page->add('Tabs');
 
 		foreach ($m as $approved_data) {
+			$tab1 = $tab->addTab($m['client_service']);
+
 			$billing_service_id = $approved_data['client_service_id'];
 			if(!isset($labour_array[$billing_service_id])) $labour_array[$billing_service_id] = [];
 
-			// $atten_m = $this->add('xavoc\securityservices\Model_Attendance');
-			// $atten_m->addExpression('billing_service_id')->set(function($m,$q){
-			// 	return $m->refSql('client_service_id')->fieldQuery('billing_service_id');
-			// });
-
-			// $atten_m->addCondition('client_month_year_id',$this->id);
-			// $atten_m->addCondition('billing_service_id',$billing_service_id);
-			
 			$units_approved = $m['units_approved'];
 			$client_shift_hour = 1;
 			$duty_to_implement = $units_approved / $client_shift_hour;
@@ -603,6 +598,44 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 					}
 				}
 			}
+			
+			// 
+			$pl_model = $this->add('xavoc\securityservices\Model_PL');
+			$pl_model->addCondition('client_month_year_id',$this->id);
+			$pl_model->addCondition('client_billing_service_id',$billing_service_id);
+			
+			$record_count = $pl_model->count()->getOne();
+
+			if(!$record_count){
+
+				$pl_query = "INSERT into secserv_pl (client_month_year_id,client_billing_service_id,labour_id,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11,d12,d13,d14,d15,d16,d17,d18,d19,d20,d21,d22,d23,d24,d25,d26,d27,d28,d29,d30,d31,total_present) VALUES ";
+				$has_column = 0;
+				foreach($labour_array as $billing_id => $labour) {
+					foreach ($labour as $l_id => $atten_array){
+						$pl_query .= "('".$this->id."','".$billing_id."','".$l_id."',";
+
+						$temp = "";
+						$total_present = 0;
+						foreach ($atten_array as $day => $value) {
+							$has_column = 1;
+							$temp .= "'".$value."',";
+							if($value == "P") $total_present++;
+						}
+
+						$temp .= "'".$total_present."',";
+						$pl_query .= trim($temp,',')."),";
+					}
+				}
+
+				$pl_query = trim($pl_query,",").";";
+				if($has_column)
+					$this->app->db->dsql()->expr($pl_query)->execute();
+			}
+
+			$grid = $tab1->add('Grid');
+			$grid->setModel($pl_model);
+			$grid->add('misc/Export');			
+
 		}
 
 		// $page->add('View')->set("Duty implemented=".$duty_implemented." duty to implement=".$duty_to_implement);
@@ -611,36 +644,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		// print_r($labour_array);
 		// echo "</pre>";
 
-		$pl_model = $this->add('xavoc\securityservices\Model_PL');
-		$pl_model->addCondition('client_month_year_id',$this->id);
-		$record_count = $pl_model->count()->getOne();
-
-		if(!$record_count){
-
-			$pl_query = "INSERT into secserv_pl (client_month_year_id,client_billing_service_id,labour_id,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11,d12,d13,d14,d15,d16,d17,d18,d19,d20,d21,d22,d23,d24,d25,d26,d27,d28,d29,d30,d31,total_present) VALUES ";
-			foreach($labour_array as $billing_id => $labour) {
-				foreach ($labour as $l_id => $atten_array){
-					$pl_query .= "('".$this->id."','".$billing_id."','".$l_id."',";
-
-					$temp = "";
-					$total_present = 0;
-					foreach ($atten_array as $day => $value) {
-						$temp .= "'".$value."',";
-						if($value == "P") $total_present++;
-					}
-
-					$temp .= "'".$total_present."',";
-					$pl_query .= trim($temp,',')."),";
-				}
-			}
-
-			$pl_query = trim($pl_query,",").";";
-			$this->app->db->dsql()->expr($pl_query)->execute();
-		}
-
-		$grid = $page->add('Grid');
-		$grid->setModel($pl_model);
-		$grid->add('misc/Export');
+		
 
 		// $export = $grid->addButton('Export CSV');
 		// $key = "export_csv_file_".$this->id;
