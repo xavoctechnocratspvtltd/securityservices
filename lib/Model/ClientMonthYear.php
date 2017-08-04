@@ -485,7 +485,6 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$m = $page->add('xavoc\securityservices\Model_ClientMonthYearApprovedData');
 		$m->addCondition('client_month_year_id', $this->id);
 
-		$labour_array = [];
 		$sheet_array = [];
 		$days_in_month = date('t',strtotime($this['month_year']));
 
@@ -496,6 +495,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$tab = $page->add('Tabs');
 
 		foreach ($m as $approved_data) {
+			$labour_array = [];
 			$tab1 = $tab->addTab($m['client_service']);
 
 			$billing_service_id = $approved_data['client_service_id'];
@@ -603,7 +603,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			$pl_model = $this->add('xavoc\securityservices\Model_PL');
 			$pl_model->addCondition('client_month_year_id',$this->id);
 			$pl_model->addCondition('client_billing_service_id',$billing_service_id);
-			
+
 			$record_count = $pl_model->count()->getOne();
 
 			if(!$record_count){
