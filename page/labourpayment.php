@@ -88,7 +88,10 @@ class page_labourpayment extends \xepan\base\Page {
 
 			foreach($csv_rows as $key=>$row){
 				foreach ($row as $field => $value) {
-				 	echo $value . ",";
+				 	if($field == "now")
+				 		echo $value;
+				 	else
+				 		echo $value.",";
 				}
 				echo "\n";
 				// fputcsv($fp,$row, ",");
