@@ -27,11 +27,13 @@ class Model_Payment extends \xepan\base\Model_Table{
 		$this->addField('gross_amount')->defaultValue(0);
 		$this->addField('pf_amount')->defaultValue(0);
 		$this->addField('uniform_deduction')->defaultValue(0);
+		$this->addField('other_deduction')->defaultValue(0);
 		$this->addField('fine')->defaultValue(0);
 		$this->addField('advance')->defaultValue(0);
 		$this->addField('allowances')->defaultValue(0);
 		$this->addField('net_payable')->defaultValue(0);
-
+		$this->addField('remark')->type('text');
+		
 		$this->addHook('beforeSave',$this);
 
 		$this->add('dynamic_model/Controller_AutoCreator');
@@ -46,13 +48,15 @@ class Model_Payment extends \xepan\base\Model_Table{
 			$net_payable -= $this['pf_amount'];
 		if($this['uniform_deduction'] > 0)
 			$net_payable -= $this['uniform_deduction'];
+		if($this['other_deduction'] > 0)
+			$net_payable -= $this['other_deduction'];
 		if($this['fine'] > 0)
 			$net_payable -= $this['fine'];
 		if($this['advance'] > 0)
 			$net_payable -= $this['advance'];
 		if($this['allowances'] > 0)
 			$net_payable += $this['allowances'];
-
+		
 		$this['net_payable'] = round($net_payable);
 	}
 }
