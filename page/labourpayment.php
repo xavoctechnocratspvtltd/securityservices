@@ -90,6 +90,8 @@ class page_labourpayment extends \xepan\base\Page {
 				foreach ($row as $field => $value) {
 				 	if($field == "now")
 				 		echo $value;
+				 	if($field == 'net_amount')
+				 		echo number_format((float)$value, 2, '.', '').",";
 				 	else
 				 		echo $value.",";
 				}
