@@ -93,7 +93,7 @@ class page_labourpayment extends \xepan\base\Page {
 				 	else
 				 		echo $value.",";
 				}
-				echo "\n";
+				echo "\r\n";
 				// fputcsv($fp,$row, ",");
 			}
 			fclose($fp);
