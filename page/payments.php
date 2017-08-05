@@ -62,12 +62,13 @@ class page_payments extends \xepan\base\Page {
 
 			// delete button
 			if($form->isClicked($delete_btn)){
+				
 				$payment_model = $this->add('xavoc\securityservices\Model_Payment');
 				$payment_model->addCondition('date',$form['month_year']);
 				if($form['client'])
 					$payment_model->addCondition('client_id',$form['client']);
 				if($form['client_services'])
-					$payment_model->addCondition('client_service_id',$form['client_service_id']);
+					$payment_model->addCondition('client_service_id',$form['client_services']);
 				$count = $payment_model->count()->getOne();
 				$payment_model->deleteAll();
 				$form->js(null,$crud->js()->reload(['month_year'=>$form['month_year']]))->univ()->errorMessage($count.' records deleted')->execute();
