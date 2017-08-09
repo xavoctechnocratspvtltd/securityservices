@@ -130,8 +130,8 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 					if(!isset($labour_atten[$labour_id])){
 						$labour_atten[$labour_id] = [];
-						$labour_atten[$labour_id]['name'] = $record['labour'];
 						$labour_atten[$labour_id]['sno'] = $s_no;
+						$labour_atten[$labour_id]['name'] = $record['labour'];
 						$s_no++;
 						for ($i=1; $i <= $days_in_month; $i++) {
 							$labour_atten[$labour_id][$i] = 0;
