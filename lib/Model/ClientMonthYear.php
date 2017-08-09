@@ -11,7 +11,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 	public $status=['All'];
 
-	public $actions=['All'=>['view','edit','delete','manage_attendance','generate_approval_sheet','approved_service_data','generate_invoice','print_invoice','print_invoice_attachment','labour_payment','delete_Attandance','generate_PL']];
+	public $actions=['All'=>['view','edit','delete','manage_attendance','export_attendance','delete_Attandance','generate_approval_sheet','approved_service_data','generate_invoice','print_invoice','print_invoice_attachment','labour_payment','generate_PL']];
 
 	function init(){
 		parent::init();
@@ -83,7 +83,101 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 	function manage_attendance(){
 		$this->app->redirect($this->app->url('xavoc_secserv_manageattendance',['client_monthyear_record_id'=>$this->id]));
+		
 	}
+
+	function page_export_attendance($page){
+		if($this->ref('xavoc\securityservices\Attendance')->count()->getOne() == 0){
+			$page->add('View_Error')->set('Please Generate Attendance First');
+			return;
+		}
+		
+		$tabs = $page->add('Tabs');
+		$services = $this->add('xavoc\securityservices\Model_BillingService');
+
+		$tabs_array=[];
+		$days_in_month = date('t',strtotime($this['month_year']));
+
+		foreach ($services as $bs) {
+
+			$a_model = $this->add('xavoc\securityservices\Model_Attendance');
+			$a_model->addExpression('billing_service_id')->set(function($m,$q){
+				return $q->expr('[0]',[$m->refSQL('client_service_id')->fieldQuery('billing_service_id')]);
+			});
+			$a_model->addCondition('billing_service_id',$bs['id']);
+			$a_model->addCondition('client_month_year_id',$this->id);
+
+			if(!$a_model->count()->getOne()) continue;
+
+			$tab = $tabs->addTab($bs['name']);
+			$export = $tab->add('Button')->set('Export '.$bs['name']." Attendance");
+			$export->js('click')->univ()->newWindow($page->app->url(null,['service'=>$bs['name']]));
+			
+			/**
+				$labours = [
+					'key'=>['name'=>,'d1'=>,'d2'=>,'d3'=>,..,'total_hours'=>]
+				]
+			*/
+			$s_no = 1;
+			$labour_atten = [];
+			if($_GET['service']===$bs['name']){
+				
+				$a_data = $a_model->getRows();
+				$total_hours = 0;
+
+				foreach ($a_data as $key => $record) {
+					$labour_id = $record['labour_id'];
+
+					if(!isset($labour_atten[$labour_id])){
+						$labour_atten[$labour_id] = [];
+						$labour_atten[$labour_id]['name'] = $record['labour'];
+						$labour_atten[$labour_id]['sno'] = $s_no;
+						$s_no++;
+						for ($i=1; $i <= $days_in_month; $i++) {
+							$labour_atten[$labour_id][$i] = 0;
+						}
+					}
+
+					$labour_atten[$labour_id][$record['day']] = $record['units_work'];
+					$labour_atten[$labour_id]['total_hours'] += $record['units_work'];
+				}
+
+				$file_name = "attendance_".$this['client']."_".$this['month']."_".$this['year']."_".str_replace(" ", "", $bs['name']).".csv";
+				header("Pragma: public");
+				header("Expires: 0");
+				header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+				header("Cache-Control: private",false);
+				header("Content-Type: application/octet-stream");
+				header("Content-Disposition: attachment; filename=\"$file_name\";" );
+				header("Content-Transfer-Encoding: binary");
+
+				$header = ['sno'=>'S.No.','name'=>'Name'];
+				for($i=1; $i <= $days_in_month; $i++){
+					$header["d".$i] = $i;
+				}
+				$header['total_hours'] = 'Total Hours';
+
+				$output = implode(",", $header);
+				$fp = fopen("php://output", "w");
+				fputcsv ($fp, $header, ",");
+
+				foreach($labour_atten as $key=>$row){
+					fputcsv($fp, $row, ",");
+				}
+				fclose($fp);
+				exit;
+			}
+
+			// $form = $tab->add('Form');
+			// $form->addSubmit("Export ".$bs['name']." Attendance");
+			// if($form->isSubmitted()){
+				
+			// }
+
+		}
+
+	}
+
 
 	function page_generate_approval_sheet($page){
 
