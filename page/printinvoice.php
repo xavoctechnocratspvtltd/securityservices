@@ -40,7 +40,7 @@ class page_printinvoice extends \Page {
 		$master_array['sgst_service_tax'] = round($month_year_model['service_tax']/2,2);
 		$master_array['service_tax_amount'] = $month_year_model['service_tax_amount'];
 		$master_array['cgst_service_tax_amount'] = round($month_year_model['service_tax_amount']/2,2);
-		$master_array['igst_service_tax_amount'] = round($month_year_model['service_tax_amount']/2,2);
+		$master_array['sgst_service_tax_amount'] = round($month_year_model['service_tax_amount']/2,2);
 		$master_array['gross_amount'] = $month_year_model['gross_amount'];
 		$master_array['net_amount'] = $month_year_model['net_amount'];
 
