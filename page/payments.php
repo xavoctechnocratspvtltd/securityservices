@@ -10,6 +10,8 @@ class page_payments extends \xepan\base\Page {
 	function init(){
 		parent::init();
 
+		set_time_limit(0);
+
 		$this->app->stickyGET('month_year');
     	$client_id = $this->app->stickyGET('client_id');
     	$client_service_id = $this->app->stickyGET('client_service_id');
