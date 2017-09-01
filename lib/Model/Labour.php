@@ -17,7 +17,7 @@ class Model_Labour extends \xepan\base\Model_Table{
 		$this->hasOne('xavoc\securityservices\ClientDepartment','default_client_department_id');//->display(['form'=>'xepan\base\DropDownNormal']);
 		
 		$this->addField('name');
-		$this->addField('labour_shift_hours')->type('number');
+		// $this->addField('labour_shift_hours')->type('number');
 		$this->addField('address')->type('text');
 		$this->addField('dob')->type('date');
 		$this->addField('gender')->enum(['male','female','other']);
