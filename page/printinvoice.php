@@ -36,7 +36,11 @@ class page_printinvoice extends \Page {
 		$master_array['invoice_date'] = $month_year_model['invoice_date'];
 		$master_array['month_year'] = $month_year_model['month_year'];
 		$master_array['service_tax'] = $month_year_model['service_tax'];
+		$master_array['cgst_service_tax'] = round($month_year_model['service_tax']/2,2);
+		$master_array['sgst_service_tax'] = round($month_year_model['service_tax']/2,2);
 		$master_array['service_tax_amount'] = $month_year_model['service_tax_amount'];
+		$master_array['cgst_service_tax_amount'] = round($month_year_model['service_tax_amount']/2,2);
+		$master_array['igst_service_tax_amount'] = round($month_year_model['service_tax_amount']/2,2);
 		$master_array['gross_amount'] = $month_year_model['gross_amount'];
 		$master_array['net_amount'] = $month_year_model['net_amount'];
 
