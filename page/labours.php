@@ -61,7 +61,7 @@ class page_labours extends \xepan\base\Page {
 		$form->addSubmit('Download Sample File');
 		
 		if($_GET['download_sample_csv_file']){
-			$output = ['name','labour_shift_hours','address','dob','gender','mobile_no','email_id','guardian_name','bank_name','bank_account_no','bank_ifsc_code','bank_branch','is_active','default_client','default_client_service','default_client_department'];
+			$output = ['name','labour_personal_shift_hours','address','dob','gender','mobile_no','email_id','guardian_name','bank_name','bank_account_no','bank_ifsc_code','bank_branch','is_active','default_client','default_client_service','default_client_department'];
 
 			$output = implode(",", $output);
 	    	header("Content-type: text/csv");
