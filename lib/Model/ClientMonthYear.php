@@ -60,7 +60,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$this->is([
 				'client_id|to_trim|required',
 				'name|to_trim|required',
-				'invoice_no|to_trim|required',
+				// 'invoice_no|to_trim|required',
 				'invoice_date|to_trim|required',
 				'month_year|to_trim|required'
 			]);
@@ -399,7 +399,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$col2 = $col->addColumn('4')->addClass('col-md-4 col-lg-4 col-sm-12 col-xs-12');
 		$col3 = $col->addColumn('4')->addClass('col-md-4 col-lg-4 col-sm-12 col-xs-12');
 
-		$col1->addField('invoice_no')->validate('required')->set($this['invoice_no']);
+		$col1->addField('invoice_no')->set($this['invoice_no']);
 		$col2->addField('DatePicker','invoice_date')->validate('required')->set($this['invoice_date']);		
 		$col3->addSubmit('Save');
 
