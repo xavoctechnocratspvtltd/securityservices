@@ -30,7 +30,8 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		self.widget_header = $('<div class="sec-widget-header">').appendTo(self.wrapper);
 		self.widget_row = $('<div class="row">').appendTo(self.widget_header);
 		self.widget_row_col1 = $('<div class="col-md-6 col-sm-6">').appendTo(self.widget_row);
-		self.widget_row_col2 = $('<div class="col-md-6 col-sm-6">').appendTo(self.widget_row);
+		self.widget_row_col2 = $('<div class="col-md-4 col-sm-4">').appendTo(self.widget_row);
+		self.widget_row_col3 = $('<div class="col-md-2 col-sm-2">Show/Hide Absent Labour</div>').appendTo(self.widget_row);
 
 		self.table = table = $('<table class="sec-employee-attendance data" border="1" style="width:100%;"></table>').appendTo(self.wrapper);
 		self.thead = thead = $('<thead class="sec-header">').appendTo(table);
@@ -81,6 +82,16 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 			});
 		});
 
+		// hide/show of zero filled value
+		show_hode_absent_labour = $('<input type="checkbox">').appendTo(self.widget_row_col3)
+		$(show_hode_absent_labour).change(function(event) {
+
+			$('.secser-attendance-total-hour').each(function(index, el) {
+				if(parseInt($(el).html()) == 0){
+					$(this).closest('tr').toggle();
+				}
+			});
+		});	
 	},
 
 	addSaveButton: function(){
@@ -259,7 +270,7 @@ jQuery.widget("ui.xavoc_secserv_attendance",{
 		}
 
 		// total hours row wise
-		tr_html += '<td class="labour_units_work_row_total" style="text-align:right;"><div class="secser-attendance-total-hour">'+row_total_hours+'</div></td>';
+		tr_html += '<td class="labour_units_work_row_total" style="text-align:right;"><div class="secser-attendance-total-hour btn btn-success">'+row_total_hours+'</div></td>';
 		tr_html += "</tr>";
 
 		if($(self.tbody).find('.day-total-working-hours').length > 0){
