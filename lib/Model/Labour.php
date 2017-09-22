@@ -24,9 +24,9 @@ class Model_Labour extends \xepan\base\Model_Table{
 		$this->addField('mobile_no');
 		$this->addField('email_id');
 		$this->addField('guardian_name')->hint('FATHER NAME (OR HUSBANDS NAME IN CASE OF MARRIED WOMEN)');
-		$this->addField('bank_name');
-		$this->addField('bank_account_no');
-		$this->addField('bank_ifsc_code');
+		$this->addField('bank_name')->sortable(true);
+		$this->addField('bank_account_no')->sortable(true);
+		$this->addField('bank_ifsc_code')->sortable(true);
 		$this->addField('bank_branch');
 		$this->addField('is_active')->type('boolean')->defaultValue(true);
 		$this->addField('is_pf_deduction')->type('boolean')->defaultValue(true);

@@ -18,6 +18,7 @@ class Initiator extends \Controller_Addon {
         $m->addItem(['Monthly Records','icon'=>'fa fa-check-square-o'],'xavoc_secserv_monthrecords');
         $m->addItem(['Generate Payments','icon'=>'fa fa-check-square-o'],'xavoc_secserv_payments');
         $m->addItem(['Labour Payment','icon'=>'fa fa-check-square-o'],'xavoc_secserv_labourpayment');
+        $m->addItem(['Labour PF Report','icon'=>'fa fa-check-square-o'],'xavoc_secserv_pfreport');
         $m->addItem(['Configuration','icon'=>'fa fa-cog'],'xavoc_secserv_configuration');
         return $this;
     }
