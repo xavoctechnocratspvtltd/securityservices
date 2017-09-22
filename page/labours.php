@@ -13,7 +13,7 @@ class page_labours extends \xepan\base\Page {
 		$c = $this->add('xepan\hr\CRUD');
 		$c->setModel('xavoc\securityservices\Labour',
 				['name','address','dob','gender','mobile_no','email_id','guardian_name','bank_name','bank_account_no','bank_ifsc_code','bank_branch','default_client_id','default_client_service_id','default_client_department_id','labour_personal_shift_hours','is_active','is_pf_deduction'],
-				['name','mobile_no','bank_name','bank_account_no','bank_ifsc_code','bank_branch','labour_personal_shift_hours','is_active','default_client','default_client_service','default_client_department','is_pf_deduction']
+				['name','labour_personal_shift_hours','mobile_no','bank_name','bank_account_no','bank_ifsc_code','bank_branch','labour_personal_shift_hours','is_active','default_client','default_client_service','default_client_department','is_pf_deduction']
 			);
 
 		$c->grid->addQuickSearch(['name','bank_account_no','mobile_no','bank_name','bank_ifsc_code']);

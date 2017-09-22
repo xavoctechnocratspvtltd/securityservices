@@ -227,7 +227,10 @@ class page_manageattendance extends \xepan\base\Page {
 				}
 
 				$date = $year.'-'.$month.'-'.$day;
+
 				$attendance_date = date("Y-m-d H:i:s", strtotime($date));
+				// if(($shift_work > 0 OR $overtime_work > 0 OR $units_work) && $day ==1)
+					// echo "labour = ".$labour_id." units_work=".$units_work." overtime worsk= ".$overtime_work." shift work =".$shift_work."<br/>";
 				$insert_sql .= '("'.$labour_id.'", "'.$client_month_year_id.'", "'.$client_department_model->id.'", "'.$client_department_model['default_client_service_id'].'", "'.$units_work.'", "'.$attendance_date.'", "'.$overtime_work.'", "'.$shift_work.'"),';
 			}
 		}
