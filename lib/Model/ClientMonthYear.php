@@ -393,15 +393,17 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$approved_tab = $tabs->addTab('Approved Units');
 
 		$form = $invoice_tab->add('Form');
-		$form->add('View')->setElement('h3')->set('Invoice Information');
-		$col = $form->add('Columns')->addClass('row');
-		$col1 = $col->addColumn('4')->addClass('col-md-4 col-lg-4 col-sm-12 col-xs-12');
-		$col2 = $col->addColumn('4')->addClass('col-md-4 col-lg-4 col-sm-12 col-xs-12');
-		$col3 = $col->addColumn('4')->addClass('col-md-4 col-lg-4 col-sm-12 col-xs-12');
-
-		$col1->addField('invoice_no')->set($this['invoice_no']);
-		$col2->addField('DatePicker','invoice_date')->validate('required')->set($this['invoice_date']);		
-		$col3->addSubmit('Save');
+		$form->add('xepan\base\Controller_FLC')
+				->addContentSpot()
+				// ->makePanelsCoppalsible()
+				->layout([
+					'invoice_no'=>'c1~4',
+					'invoice_date'=>'c2~4',
+					'FormButtons~'=>'c3~4',
+				]);
+		$form->addField('invoice_no')->set($this['invoice_no']);
+		$form->addField('DatePicker','invoice_date')->validate('required')->set($this['invoice_date']);
+		$form->addSubmit('Save')->addClass('btn btn-primary');
 
 		if($form->isSubmitted()){
 			$this['invoice_no'] = $form['invoice_no'];
@@ -410,17 +412,44 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			return $form->js(true,$form->js()->univ()->successMessage('Saved'))->reload();
 		}
 
-		$invoice_tab->add('View')->setElement('h3')->set('Invoice Item');
+		// $invoice_tab->add('View')->setElement('h3')->set('Invoice Item');
 		$c = $invoice_tab->add('xepan\base\CRUD');
 		$recalc_btn = $c->addButton('Re Calculate')->addClass('btn btn-primary');
 		$recalc_btn->on('click',function($js,$data)use($c){
-			$this->calculateInvoiceData();
+
+			$app_data = $this->add('xavoc\securityservices\Model_ClientMonthYearApprovedData');
+			$app_data->addCondition('client_month_year_id', $this->id);
+			if(!$app_data->count()->getOne()){
+				return $c->js()->univ()->errorMessage("first add approval sheet/data");
+			}
+
+			$m = $this->add('xavoc\securityservices\Model_InvoiceDetail');
+			$m->addCondition('client_month_year_id', $this->id);
+			$m->deleteAll();
+
+			foreach ($app_data as $ad) {
+				$cs = $this->add('xavoc\securityservices\Model_ClientService');
+				$cs->addCondition('client_id',$this['client_id']);
+				$cs->addCondition('billing_service_id',$ad['client_service_id']);
+				$cs->tryLoadAny();
+				$rate = $cs['invoice_rate'];
+				if(!$cs->loaded())
+					$rate = 0;
+
+				$m = $this->add('xavoc\securityservices\Model_InvoiceDetail');
+				$m['client_month_year_id'] = $this->id;
+				$m['billing_service_id'] = $ad['client_service_id'];
+				$m['units'] = $ad['units_approved'];
+				$m['rate'] = $rate;
+				$m->save();
+			}
+			// $this->calculateInvoiceData();
 			return $c->grid->js()->reload();
 		});
 
 		$m = $this->add('xavoc\securityservices\Model_InvoiceDetail');
 		$m->addCondition('client_month_year_id', $this->id);
-		$c->setModel($m,['billing_service_id','units','rate'],['billing_service_id','units','rate','amount']);
+		$c->setModel($m,['billing_service_id','units','rate'],['billing_service','units','rate','amount']);
 		if($c->isEditing()){
 			$form = $c->form;
 			$bs_id_field = $form->getElement('billing_service_id');
@@ -446,7 +475,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$m->addCondition('client_month_year_id', $this->id);
 		$g->setModel($m);
 
-		$page->add('View')->set('DO CALCULATION HERE IF NO RECORD IS GENERATED');
+		// $page->add('View')->set('DO CALCULATION HERE IF NO RECORD IS GENERATED');
 	}
 
 	function calculateInvoiceData(){
