@@ -213,7 +213,8 @@ class page_manageattendance extends \xepan\base\Page {
 
 				$labour_shift_hours = 0;
 				if(isset($labours[$labour_id])){
-					$labour_shift_hours = $labours[$labour_id]['labour_personal_shift_hours'];
+					// $labour_shift_hours = $labours[$labour_id]['labour_personal_shift_hours'];
+					$labour_shift_hours = $dept_client_shift_hours;
 				}
 
 				if($shift_work > $labour_shift_hours){
