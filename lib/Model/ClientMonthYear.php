@@ -7,7 +7,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 	
 	public $table = "secserv_client_monthyear_record";
 	
-	public $acl_type="Record Generate";
+	public $acl_type="Client Record Generate";
 
 	public $status=['All'];
 
