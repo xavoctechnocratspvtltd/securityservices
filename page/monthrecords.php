@@ -44,15 +44,15 @@ class page_monthrecords extends \xepan\base\Page {
 
 		$c->setModel($model,['client_id','name','invoice_no','invoice_date','month_year','gross_amount','service_tax','service_tax_amount','net_amount'],['client','name','invoice_no','invoice_date','month_year','gross_amount','service_tax_amount','net_amount','status']);
 
-		if($c->isEditing()){
-			$form = $c->form;
-			$field_month_year = $form->getElement('month_year');
-			$field_month_year->options = [
-								'format'=> "yyyy-mm",
-			    				'startView'=> "months", 
-			    				'minViewMode'=> "months"
-			    			];
-		}
+		// if($c->isEditing()){
+			// $form = $c->form;
+			// $field_month_year = $form->getElement('month_year');
+			// $field_month_year->options = [
+			// 					'format'=> "yyyy-mm",
+			//     				'startView'=> "months", 
+			//     				'minViewMode'=> "months"
+			//     			];
+		// }
 
 		$c->grid->removeColumn('status');
 		$c->grid->removeColumn('created_by');
