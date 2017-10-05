@@ -731,7 +731,13 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 			if(!$record_count){
 
-				$pl_query = "INSERT into secserv_pl (client_month_year_id,client_billing_service_id,labour_id,d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,d11,d12,d13,d14,d15,d16,d17,d18,d19,d20,d21,d22,d23,d24,d25,d26,d27,d28,d29,d30,d31,total_present) VALUES ";
+				$pl_query = "INSERT into secserv_pl (client_month_year_id,client_billing_service_id,labour_id,";
+
+				for ($i=1; $i <= $days_in_month; $i++) {
+					$pl_query .= "d".$i.",";
+				}
+				$pl_query .= " total_present) VALUES ";
+				
 				$has_column = 0;
 				foreach($labour_array as $billing_id => $labour) {
 					foreach ($labour as $l_id => $atten_array){
