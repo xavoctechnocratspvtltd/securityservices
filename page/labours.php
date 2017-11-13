@@ -21,7 +21,7 @@ class page_labours extends \xepan\base\Page {
 		$c->grid->removeColumn('status');
 
 		$c->grid->removeColumn('created_by');
-		$c->grid->removeColumn('action');
+		// $c->grid->removeColumn('action');
 		$c->grid->removeColumn('attachment_icon');
 		$c->grid->addPaginator($ipp=50);
 		$this->app->stickyGET('client_id');

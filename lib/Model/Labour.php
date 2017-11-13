@@ -8,6 +8,10 @@ class Model_Labour extends \xepan\base\Model_Table{
 
 	public $acl_type="labour";
 
+	public $status = ['All'];
+ 	public $actions = [
+ 						'All'=>['view','edit','delete']
+ 					];
 	function init(){
 		parent::init();
 
@@ -34,6 +38,8 @@ class Model_Labour extends \xepan\base\Model_Table{
 		$this->add('xavoc\securityservices\Controller_ACLFields');
 		$this->hasMany('xavoc\securityservices\Attendance','labour_id',null,'Attendance');
 		
+		$this->addExpression('status')->set('"All"');
+
 		$this->addHook('beforeSave',$this);
 	}
 

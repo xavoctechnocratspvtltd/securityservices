@@ -254,7 +254,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			}else{
 				$c = $tab->add('xepan\hr\CRUD');
 				$c->setModel($model);
-				$c->grid->removeColumn('action');
+				// $c->grid->removeColumn('action');
 				$c->grid->removeColumn('attachment_icon');
 				$c->grid->removeColumn('name');
 				$export = $c->grid->addButton('Export CSV');
