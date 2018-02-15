@@ -15,7 +15,7 @@ class page_billingservices extends \xepan\base\Page {
 		$c->grid->addQuickSearch(['name']);
 		$c->grid->addPaginator($ipp=50);
 
-		$c->grid->removeColumn('action');
+		// $c->grid->removeColumn('action');
 		$c->grid->removeColumn('attachment_icon');
 	}
 }

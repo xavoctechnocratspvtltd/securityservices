@@ -8,6 +8,10 @@ class Model_Labour extends \xepan\base\Model_Table{
 
 	public $acl_type="labour";
 
+	public $status = ['All'];
+ 	public $actions = [
+ 						'All'=>['view','edit','delete']
+ 					];
 	function init(){
 		parent::init();
 
@@ -17,16 +21,16 @@ class Model_Labour extends \xepan\base\Model_Table{
 		$this->hasOne('xavoc\securityservices\ClientDepartment','default_client_department_id');//->display(['form'=>'xepan\base\DropDownNormal']);
 		
 		$this->addField('name');
-		$this->addField('labour_personal_shift_hours')->type('number');
+		$this->addField('labour_personal_shift_hours')->type('number')->sortable(true);
 		$this->addField('address')->type('text');
 		$this->addField('dob')->type('date');
 		$this->addField('gender')->enum(['male','female','other']);
 		$this->addField('mobile_no');
 		$this->addField('email_id');
 		$this->addField('guardian_name')->hint('FATHER NAME (OR HUSBANDS NAME IN CASE OF MARRIED WOMEN)');
-		$this->addField('bank_name');
-		$this->addField('bank_account_no');
-		$this->addField('bank_ifsc_code');
+		$this->addField('bank_name')->sortable(true);
+		$this->addField('bank_account_no')->sortable(true);
+		$this->addField('bank_ifsc_code')->sortable(true);
 		$this->addField('bank_branch');
 		$this->addField('is_active')->type('boolean')->defaultValue(true);
 		$this->addField('is_pf_deduction')->type('boolean')->defaultValue(true);
@@ -36,6 +40,8 @@ class Model_Labour extends \xepan\base\Model_Table{
 		$this->add('xavoc\securityservices\Controller_ACLFields');
 		$this->hasMany('xavoc\securityservices\Attendance','labour_id',null,'Attendance');
 		
+		$this->addExpression('status')->set('"All"');
+
 		$this->addHook('beforeSave',$this);
 	}
 
