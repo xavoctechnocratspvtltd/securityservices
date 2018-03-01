@@ -19,7 +19,7 @@ class page_pfreport extends \xepan\base\Page {
     				'minViewMode'=> "months"
     			];
 
-    	$grid = $this->add('Grid');
+    	$grid = $this->add('xepan\base\Grid');
 
     	$form->addSubmit('Submit');
     	if($form->isSubmitted()){
@@ -30,6 +30,7 @@ class page_pfreport extends \xepan\base\Page {
     	$p_m = $this->add('xavoc\securityservices\Model_Payment');
     	$p_m->addExpression('account_no')->set($p_m->refSQL('labour_id')->fieldQuery('bank_account_no'));
     	$p_m->addExpression('ifsc_code')->set($p_m->refSQL('labour_id')->fieldQuery('bank_ifsc_code'));
+    	$p_m->addExpression('uan')->set($p_m->refSQL('labour_id')->fieldQuery('uan'));
 
     	$p_m->addExpression('sum_gross_amount')->set('sum(gross_amount)')->caption('gross amount');
     	$p_m->addExpression('sum_pf_amount')->set('sum(pf_amount)')->caption('pf amount');
@@ -50,7 +51,7 @@ class page_pfreport extends \xepan\base\Page {
 		$p_m->addCondition('net_payable','>',0);
 		$p_m->addCondition('pf_amount','>',0);
 		$p_m->_dsql()->group('labour_id');
-    	$grid->setModel($p_m,['labour','sum_gross_amount','sum_pf_amount','sum_net_payable']);
+    	$grid->setModel($p_m,['labour','uan','sum_gross_amount','sum_pf_amount','sum_net_payable']);
     	// $grid->add('misc/Export');
 
     	$export = $grid->addButton('Export CSV');
@@ -63,13 +64,16 @@ class page_pfreport extends \xepan\base\Page {
 			$csv_rows = [];
 
 			$temp = [];
+			$s_no = 1;
 			foreach ($record as $data){
-				// $temp['month_year'] = $salary;
+				$temp['s_no'] = $s_no;
 				$temp['labour'] = trim($data['labour'],',');
+				$temp['uan'] = $data['uan'];
 				$temp['gross_amount'] = $data['sum_gross_amount'];
 				$temp['pf_amount'] = $data['sum_pf_amount'];
 				$temp['net_amount'] = $data['sum_net_payable'];
 				$csv_rows[] = $temp;
+				$s_no = $s_no + 1;
 			}
 
 			$file_name = str_replace(" ", "", $salary).".csv";
@@ -83,7 +87,7 @@ class page_pfreport extends \xepan\base\Page {
 
 			// $output = implode(",", $header);
 			$fp = fopen("php://output", "w");
-			fputcsv ($fp, ["Labour","Gross Amount","PF Amount","Net Amount"], ",");
+			fputcsv ($fp, ['S no',"Labour",'UAN',"Gross Amount","PF Amount","Net Amount"], ",");
 
 			foreach($csv_rows as $key=>$row){
 				foreach ($row as $field => $value) {
