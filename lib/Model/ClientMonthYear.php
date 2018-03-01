@@ -618,14 +618,14 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		
 		$tab = $page->add('Tabs');
 
-		foreach ($m as $approved_data) {
+		foreach ($m as $approved_data){
 			$labour_array = [];
-			$tab1 = $tab->addTab($m['client_service']);
+			$tab1 = $tab->addTab($approved_data['client_service']);
 
 			$billing_service_id = $approved_data['client_service_id'];
 			if(!isset($labour_array[$billing_service_id])) $labour_array[$billing_service_id] = [];
 
-			$units_approved = $m['units_approved'];
+			$units_approved = $approved_data['units_approved'];
 			$client_shift_hour = 1;
 			$duty_to_implement = $units_approved / $client_shift_hour;
 			$duty_implemented = 0;
@@ -634,66 +634,15 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 			$last_rand_no = 0;
 			$labour_used = [];
 
-			// foreach($atten_m as $a) {
+			$labour_model = $this->add('xavoc\securityservices\Model_ClientLabour',['client_month_year_id'=>$this->id,'client_id'=>$this['client_id']]);
+			$labour_model->addCondition('is_active',true);
+			$labour_model->setOrder('client_month_units_work','desc');
+			$default_labours = $labour_model->getRows();
 
-			// 	$labour_id = $a['labour_id'];
-			// 	if(!isset($labour_array[$billing_service_id][$labour_id])) $labour_array[$billing_service_id][$labour_id] = $sheet_array;
+			foreach($default_labours as $a){
+				$labour_id = $a['id'];
 
-			// 	$start_leave_day = rand(1,6);
-
-			// 	if($last_rand_no == $start_leave_day){
-			// 		$last_rand_no += 1;
-			// 		if($last_rand_no > 6)
-			// 			$start_leave_day = rand(1,5);
-			// 	}
-
-			// 	$last_rand_no = $start_leave_day;
-
-			// 	if($duty_implemented >= $duty_to_implement){
-			// 		break;
-			// 	} 
-
-			// 	$labour_used[$labour_id] = $labour_id;				
-				
-			// 	$week_count = 0;
-			// 	for ($i=1; $i <= $days_in_month; $i++) {
-			// 		if($duty_implemented >= $duty_to_implement){
-			// 			echo $i;
-			// 			continue;
-			// 		}
-
-			// 	// 	if($start_leave_day == $i OR ($start_leave_day + (6 * $week_count)) == $i){
-			// 	// 		$labour_array[$billing_service_id][$labour_id][$i] = 'L';
-			// 	// 		$week_count++;
-			// 	// 	}else{
-			// 	// 		$labour_array[$billing_service_id][$labour_id][$i] = 'P';
-			// 	// 		$duty_implemented++;
-			// 	// 	}
-			// 	}
-			// }
-
-			// echo "<pre>";
-			// print_r($labour_array);
-			// echo "</pre>";
-			// die();
-			// $remaining_duty = $duty_to_implement - $duty_implemented;
-
-			// if($remaining_duty <= 0) continue;
-
-			$extra_labour = $this->add('xavoc\securityservices\Model_Labour');
-			$extra_labour->addCondition('is_active',true);
-			// $extra_labour->addCondition('id','<>',$labour_used);
-			$extra_labour_count = $extra_labour->count()->getOne();
-
-			/*
-			* remaining (1000-874 = 126)
-			  client_shift_hour = 
-			  minimum_labour_required = remaining / day_in_month;
-			*/
-			$last_rand_no = 0;
-			foreach ($extra_labour as $labour) {
-				$start_leave_day = rand(1,5);
-
+				$start_leave_day = rand(1,6);
 				if($last_rand_no == $start_leave_day){
 					$last_rand_no += 1;
 					if($last_rand_no > 6)
@@ -702,8 +651,9 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 				$last_rand_no = $start_leave_day;
 
-				$labour_id = $labour->id;
-				if($duty_implemented >= $duty_to_implement) break;
+				if($duty_implemented >= $duty_to_implement){
+					break;
+				} 
 
 				$labour_used[$labour_id] = $labour_id;
 
@@ -722,8 +672,57 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 					}
 				}
 			}
-			
-			// 
+
+			$remaining_duty = $duty_to_implement - $duty_implemented;
+
+			if($remaining_duty){
+				// remaining labour count
+				$extra_labour = $this->add('xavoc\securityservices\Model_Labour');
+				$extra_labour->addCondition('is_active',true);
+				if(count($labour_used))
+					$extra_labour->addCondition('id','<>',$labour_used);
+				$extra_labour_count = $extra_labour->count()->getOne();
+
+				/*
+				* remaining (1000-874 = 126)
+				  client_shift_hour = 
+				  minimum_labour_required = remaining / day_in_month;
+				*/
+				$last_rand_no = 0;
+				foreach ($extra_labour as $labour) {
+					$start_leave_day = rand(1,5);
+
+					if($last_rand_no == $start_leave_day){
+						$last_rand_no += 1;
+						if($last_rand_no > 6)
+							$start_leave_day = rand(1,5);
+					}
+
+					$last_rand_no = $start_leave_day;
+
+					$labour_id = $labour->id;
+					if($duty_implemented >= $duty_to_implement) break;
+
+					$labour_used[$labour_id] = $labour_id;
+
+					if(!isset($labour_array[$billing_service_id][$labour_id])) $labour_array[$billing_service_id][$labour_id] = $sheet_array;
+					
+					$week_count = 0;
+					for ($i=1; $i <= $days_in_month; $i++) {
+						if($duty_implemented >= $duty_to_implement) continue;
+
+						if($start_leave_day == $i OR ($start_leave_day + (6 * $week_count)) == $i){
+							$labour_array[$billing_service_id][$labour_id][$i] = "L";
+							$week_count++;
+						}else{
+							$labour_array[$billing_service_id][$labour_id][$i] = "P";
+							$duty_implemented++;
+						}
+					}
+				}
+			}
+
+			// update pl values
 			$pl_model = $this->add('xavoc\securityservices\Model_PL');
 			$pl_model->addCondition('client_month_year_id',$this->id);
 			$pl_model->addCondition('client_billing_service_id',$billing_service_id);
@@ -770,19 +769,12 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 
 		// $page->add('View')->set("Duty implemented=".$duty_implemented." duty to implement=".$duty_to_implement);
 		// $page->add('View')->set("total labour count.".count($labour_used));
-		// echo "<pre>";
-		// print_r($labour_array);
-		// echo "</pre>";
-
-		
-
 		// $export = $grid->addButton('Export CSV');
 		// $key = "export_csv_file_".$this->id;
 		// $export->js('click')->univ()->newWindow($grid->app->url(null,['record'=>$this->id]));
 		// if($_GET['record']===$this->id){
 		// 	$rows = $pl_model->getRows();
 		// 	$file_name = "PL_List_of "."_".str_replace(" ", "",$this['client'])."_".str_replace(" ", "",$this['month_year']).".csv";
-
 		// 	header("Pragma: public");
 		// 	header("Expires: 0");
 		// 	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
