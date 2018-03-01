@@ -413,9 +413,11 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		}
 
 		// $invoice_tab->add('View')->setElement('h3')->set('Invoice Item');
-		$c = $invoice_tab->add('xepan\base\CRUD');
+		$v = $invoice_tab->add('View');
+		$v->js('reload')->reload();
+		$c = $v->add('xepan\base\CRUD');
 		$recalc_btn = $c->addButton('Re Calculate')->addClass('btn btn-primary');
-		$recalc_btn->on('click',function($js,$data)use($c){
+		$recalc_btn->on('click',function($js,$data)use($v){
 
 			$app_data = $this->add('xavoc\securityservices\Model_ClientMonthYearApprovedData');
 			$app_data->addCondition('client_month_year_id', $this->id);
@@ -443,8 +445,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 				$m['rate'] = $rate;
 				$m->save();
 			}
-			// $this->calculateInvoiceData();
-			return $c->grid->js()->reload();
+			return $v->js()->trigger('reload');
 		});
 
 		$m = $this->add('xavoc\securityservices\Model_InvoiceDetail');
