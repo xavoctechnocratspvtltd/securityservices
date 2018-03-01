@@ -11,15 +11,17 @@ class page_labourpayment extends \xepan\base\Page {
 		
 		$this->app->stickyGET('month_year');
 		$client_id = $this->app->stickyGET('client_id');
+		$having_bank_account = $this->app->stickyGET('labour_having_account');
 
 		$form = $this->add('Form');
 		$form->add('xepan\base\Controller_FLC')
 			->showLables(true)
 			->makePanelsCoppalsible(true)
 			->layout([
-					'month_year'=>'Filter~c1~4',
+					'month_year'=>'Filter~c1~2',
 					'client'=>'c2~4',
-					'FormButtons~&nbsp;'=>'c3~4'
+					'labour_having_account'=>'c3~3',
+					'FormButtons~&nbsp;'=>'c4~3'
 				]);
 
 		$m_y_picker = $form->addField('DatePicker','month_year');
@@ -32,12 +34,14 @@ class page_labourpayment extends \xepan\base\Page {
     	$c_f->setModel('xavoc\securityservices\Model_Client');
     	$c_f->setEmptyText('All');
 
+    	$form->addField('DropDown','labour_having_account')->setValueList(['both'=>'Both','yes'=>'Yes','no'=>'No']);
+
     	$grid = $this->add('Grid');
 
     	$form->addSubmit('Submit');
     	if($form->isSubmitted()){
 			if(!$form['month_year']) $form->error('month_year','month year must not be empty');
-    		$form->js(null,$grid->js()->reload(['month_year'=>$form['month_year'],'client_id'=>$form['client']]))->univ()->execute();
+    		$form->js(null,$grid->js()->reload(['month_year'=>$form['month_year'],'client_id'=>$form['client'],'labour_having_account'=>$form['labour_having_account']]))->univ()->execute();
     	}
 
     	$p_m = $this->add('xavoc\securityservices\Model_Payment');
@@ -59,15 +63,29 @@ class page_labourpayment extends \xepan\base\Page {
 		}else{
 			$p_m->addCondition('date',-1);
 		}
-		
+
 		if($client_id){
 			$p_m->addCondition('client_id',$client_id);	
 		}
 
 		$p_m->addCondition('net_payable','>',0);
 		$p_m->_dsql()->group('labour_id');
+		
+		if($having_bank_account == 'yes'){
+    		$p_m->addCondition('account_no','>',0);
+    	}
+    	if($having_bank_account == 'no'){
+    		$p_m->addCondition([['account_no',0],['account_no',null]]);
+    	}
+
     	$grid->setModel($p_m,['labour','account_no','ifsc_code','sum_gross_amount','sum_pf_amount','sum_uniform_deduction','sum_other_deduction','sum_fine','sum_advance','sum_allowances','sum_net_payable','remarks']);
     	// $grid->add('misc/Export');
+
+    	// if($having_bank_account == 'no'){
+    	// 	$grid->removeColumn('account_no');
+    	// 	$grid->removeColumn('ifsc_code');
+    	// }
+
 
     	$export = $grid->addButton('Export CSV');
     	$export->js('click')->univ()->newWindow($grid->app->url(null,['generate_csv'=>true]));
