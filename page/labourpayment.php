@@ -10,21 +10,34 @@ class page_labourpayment extends \xepan\base\Page {
 		parent::init();
 		
 		$this->app->stickyGET('month_year');
+		$client_id = $this->app->stickyGET('client_id');
 
 		$form = $this->add('Form');
+		$form->add('xepan\base\Controller_FLC')
+			->showLables(true)
+			->makePanelsCoppalsible(true)
+			->layout([
+					'month_year'=>'Filter~c1~4',
+					'client'=>'c2~4',
+					'FormButtons~&nbsp;'=>'c3~4'
+				]);
+
 		$m_y_picker = $form->addField('DatePicker','month_year');
 		$m_y_picker->options = [
 					'format'=> "yyyy-mm",
     				'startView'=> "months", 
     				'minViewMode'=> "months"
     			];
+    	$c_f = $form->addField('DropDown','client');
+    	$c_f->setModel('xavoc\securityservices\Model_Client');
+    	$c_f->setEmptyText('All');
 
     	$grid = $this->add('Grid');
 
     	$form->addSubmit('Submit');
     	if($form->isSubmitted()){
 			if(!$form['month_year']) $form->error('month_year','month year must not be empty');
-    		$form->js(null,$grid->js()->reload(['month_year'=>$form['month_year']]))->univ()->execute();
+    		$form->js(null,$grid->js()->reload(['month_year'=>$form['month_year'],'client_id'=>$form['client']]))->univ()->execute();
     	}
 
     	$p_m = $this->add('xavoc\securityservices\Model_Payment');
@@ -45,6 +58,10 @@ class page_labourpayment extends \xepan\base\Page {
 			$p_m->addCondition('date',$_GET['month_year']);
 		}else{
 			$p_m->addCondition('date',-1);
+		}
+		
+		if($client_id){
+			$p_m->addCondition('client_id',$client_id);	
 		}
 
 		$p_m->addCondition('net_payable','>',0);
