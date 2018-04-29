@@ -40,7 +40,7 @@ class page_monthrecords extends \xepan\base\Page {
 
 		$model = $this->add('xavoc\securityservices\Model_ClientMonthYear');
 		$model->addCondition('month_year',$month_year);
-		$model->setOrder('id','desc');
+		$model->setOrder(['invoice_no asc','id desc']);
 
 		$c->setModel($model,['client_id','name','invoice_no','invoice_date','month_year','gross_amount','service_tax','service_tax_amount','net_amount'],['client','name','invoice_no','invoice_date','month_year','gross_amount','service_tax_amount','net_amount','status']);
 

@@ -401,7 +401,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 					'invoice_date'=>'c2~4',
 					'FormButtons~'=>'c3~4',
 				]);
-		$form->addField('invoice_no')->set($this['invoice_no']);
+		$form->addField('invoice_no')->set($this->newNumber());
 		$form->addField('DatePicker','invoice_date')->validate('required')->set($this['invoice_date']);
 		$form->addSubmit('Save')->addClass('btn btn-primary');
 
@@ -524,7 +524,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 	}
 
 	function newNumber(){
-		return $this->_dsql()->del('fields')->field('max(CAST(invoice_no AS decimal))')->getOne() + 1 ;
+		return $this->_dsql()->del('fields')->field('max(CAST(invoice_no AS decimal))')->where('invoice_date','>=','2018-05-01')->debug()->getOne() + 1 ;
 	}
 
 	function page_labour_payment($page){
