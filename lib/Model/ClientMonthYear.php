@@ -524,7 +524,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 	}
 
 	function newNumber(){
-		return $this->_dsql()->del('fields')->field('max(CAST(invoice_no AS decimal))')->where('invoice_date','>=','2018-05-01')->debug()->getOne() + 1 ;
+		return $this->_dsql()->del('fields')->field('max(CAST(invoice_no AS decimal))')->where('invoice_date','>=','2018-05-01')->getOne() + 1 ;
 	}
 
 	function page_labour_payment($page){
