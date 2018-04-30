@@ -20,7 +20,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 		$this->addField('name');
 		$this->addField('month_year')->type('date');
 		
-		$this->addField('invoice_no')->defaultValue($this->newNumber());
+		$this->addField('invoice_no');
 		$this->addField('invoice_date')->type('date')->defaultValue($this->app->today);
 
 		$this->addField('service_tax')->type('number');
@@ -401,7 +401,7 @@ class Model_ClientMonthYear extends \xepan\base\Model_Table{
 					'invoice_date'=>'c2~4',
 					'FormButtons~'=>'c3~4',
 				]);
-		$form->addField('invoice_no')->set($this->newNumber());
+		$form->addField('invoice_no')->set($this['invoice_no']?:$this->newNumber());
 		$form->addField('DatePicker','invoice_date')->validate('required')->set($this['invoice_date']);
 		$form->addSubmit('Save')->addClass('btn btn-primary');
 
