@@ -11,6 +11,23 @@ class page_labours extends \xepan\base\Page {
 		// parent::init();
 
 		$c = $this->add('xepan\hr\CRUD');
+		// $crud->form->add('xepan\base\Controller_FLC')
+		// 	->showLables(true)
+		// 	->makePanelsCoppalsible(true)
+		// 	->layout([
+		// 		'name~Name'=>'Labour Detail~c1~4',
+		// 		'address~Address'=>'c2~4',
+		// 		'dob'=>'c3~4',
+		// 		'gender'=>'c4~4',
+		// 		'mobile_no'=>'c5~4',
+		// 		'email_id'=>'c5~4',
+		// 		'guardian_name'=>'c5~4',
+		// 		'bank_name'=>'c5~4',
+		// 		'bank_account_no'=>'c5~4',
+		// 		'bank_ifsc_code'=>'c5~4',
+		// 		'bank_branch'=>'c5~4',
+		// 	]);
+
 		$c->setModel('xavoc\securityservices\Labour',
 				['name','address','dob','gender','mobile_no','email_id','guardian_name','bank_name','bank_account_no','bank_ifsc_code','bank_branch','default_client_id','default_client_service_id','default_client_department_id','labour_personal_shift_hours','is_active','is_pf_deduction'],
 				['name','labour_personal_shift_hours','mobile_no','bank_name','bank_account_no','bank_ifsc_code','bank_branch','labour_personal_shift_hours','is_active','default_client','default_client_service','default_client_department','is_pf_deduction']
@@ -37,8 +54,10 @@ class page_labours extends \xepan\base\Page {
 			if($_GET['d_service_id'])
 				$field_department->getModel()->addCondition('default_client_service_id',$_GET['d_service_id']);
 			
-			$field_client->js('change',$form->js()->atk4_form('reloadField','default_client_service_id',[$this->app->url(),'d_client_id'=>$field_client->js()->val()]));
+			// $field_client->js('change',$field_service->js()->reload(null,null,[$this->app->url(null,['cut_object'=>$field_service->name]),'d_client_id'=>$field_client->js()->val()]));
+			// $field_service->js('change',$field_department->js()->reload(null,null,[$this->app->url(null,['cut_object'=>$field_department->name]),'d_service_id'=>$field_service->js()->val()]));
 			$field_service->js('change',$form->js()->atk4_form('reloadField','default_client_department_id',[$this->app->url(),'d_service_id'=>$field_service->js()->val()]));
+			$field_client->js('change',$form->js()->atk4_form('reloadField','default_client_service_id',[$this->app->url(),'d_client_id'=>$field_client->js()->val()]));
 			
 		}
 

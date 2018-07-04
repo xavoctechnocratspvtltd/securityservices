@@ -16,9 +16,9 @@ class Model_Labour extends \xepan\base\Model_Table{
 		parent::init();
 
 		
-		$this->hasOne('xavoc\securityservices\Client','default_client_id');//->display(['form'=>'xepan\base\DropDownNormal']);
-		$this->hasOne('xavoc\securityservices\ClientService','default_client_service_id');//->display(['form'=>'xepan\base\DropDownNormal']);
-		$this->hasOne('xavoc\securityservices\ClientDepartment','default_client_department_id');//->display(['form'=>'xepan\base\DropDownNormal']);
+		$this->hasOne('xavoc\securityservices\Client','default_client_id')->display(['form'=>'xepan\base\DropDownNormal']);
+		$this->hasOne('xavoc\securityservices\ClientService','default_client_service_id')->display(['form'=>'xepan\base\DropDownNormal']);
+		$this->hasOne('xavoc\securityservices\ClientDepartment','default_client_department_id')->display(['form'=>'xepan\base\DropDownNormal']);
 		
 		$this->addField('name');
 		$this->addField('labour_personal_shift_hours')->type('number')->sortable(true);
